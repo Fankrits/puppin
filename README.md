@@ -23,6 +23,17 @@ bun run dev:web      # Start web app (TanStack Start, port 3000)
 bun run dev:medusa   # Start Medusa backend (port 9000)
 ```
 
+# Database (Podman / Docker)
+
+The project includes a `docker-compose.yml` for PostgreSQL 16 and Redis 7 compatible with both Podman and Docker:
+
+```bash
+bun run db:up        # Start PostgreSQL & Redis in the background (podman compose up -d)
+bun run db:down      # Stop database containers (podman compose down)
+bun run db:migrate   # Run Medusa database migrations
+bun run db:setup     # Setup database and sync links
+```
+
 # Building For Production
 
 To build all workspaces for production:

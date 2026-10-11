@@ -16,6 +16,10 @@
     "dev:medusa": "bun --filter @puppin/medusa dev",
     "build:medusa": "bun --filter @puppin/medusa build",
     "start:medusa": "bun --filter @puppin/medusa start",
+    "db:up": "podman compose up -d",
+    "db:down": "podman compose down",
+    "db:setup": "bun --filter @puppin/medusa db:setup",
+    "db:migrate": "bun --filter @puppin/medusa db:migrate",
     "check": "bun --filter @puppin/web check",
     "dev": "bun --filter '*' dev",
     "build": "bun --filter '*' build"
