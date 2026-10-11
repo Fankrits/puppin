@@ -1,10 +1,25 @@
-import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
+import { HeadContent, Scripts, createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { listRegions } from "../lib/data/regions";
 
 import appCss from "../styles.css?url";
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{
+  queryClient: QueryClient;
+}>()({
+  loader: async ({ context }) => {
+    const { queryClient } = context;
+
+    // Pre-populate regions cache on SSR
+    await queryClient.ensureQueryData({
+      queryKey: ["regions"],
+      queryFn: () => listRegions(),
+    });
+
+    return {};
+  },
   head: () => ({
     meta: [
       {
@@ -15,7 +30,7 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "TanStack Start Starter",
+        title: "Puppin Store — Modern Commerce",
       },
     ],
     links: [
@@ -29,13 +44,19 @@ export const Route = createRootRoute({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const { queryClient } = Route.useRouteContext();
+
   return (
     <html lang="en">
       <head>
         <HeadContent />
       </head>
-      <body>
-        {children}
+      <body className="min-h-screen bg-neutral-50/50 text-neutral-900 font-sans antialiased">
+        <QueryClientProvider client={queryClient}>
+          {children}
+          <Outlet />
+        </QueryClientProvider>
+
         <TanStackDevtools
           config={{
             position: "bottom-right",

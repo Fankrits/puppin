@@ -1,14 +1,21 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { listRegions } from "../lib/data/regions";
 
-export const Route = createFileRoute("/")({ component: Home });
+export const Route = createFileRoute("/")({
+  loader: async ({ context }) => {
+    const { queryClient } = context;
 
-function Home() {
-  return (
-    <div className="p-8">
-      <h1 className="text-4xl font-bold">Welcome to TanStack Start</h1>
-      <p className="mt-4 text-lg">
-        Edit <code>src/routes/index.tsx</code> to get started.
-      </p>
-    </div>
-  );
-}
+    const regions = await queryClient.ensureQueryData({
+      queryKey: ["regions"],
+      queryFn: () => listRegions(),
+    });
+
+    const defaultCountry = regions?.[0]?.countries?.[0]?.iso_2?.toLowerCase() || "us";
+
+    throw redirect({
+      to: "/$countryCode",
+      params: { countryCode: defaultCountry },
+    });
+  },
+  component: () => null,
+});

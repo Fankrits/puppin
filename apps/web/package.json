@@ -14,14 +14,28 @@
     "staged": "bun --bun vp staged"
   },
   "dependencies": {
+    "@medusajs/icons": "2.21.2",
+    "@medusajs/js-sdk": "2.21.2",
+    "@medusajs/types": "2.21.2",
+    "@radix-ui/react-accordion": "^1.2.21",
+    "@radix-ui/react-dialog": "^1.2.0",
+    "@radix-ui/react-select": "^2.3.8",
     "@tailwindcss/vite": "^4.1.18",
+    "@tanstack/query-core": "5.104.1",
     "@tanstack/react-devtools": "0.10.13",
+    "@tanstack/react-query": "^5.104.1",
     "@tanstack/react-router": "1.170.42",
     "@tanstack/react-router-devtools": "1.167.2",
+    "@tanstack/react-router-ssr-query": "^1.167.3",
     "@tanstack/react-start": "1.168.61",
+    "@untitledui/icons": "^0.0.23",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.55.0",
     "nitro": "3.0.260610-beta",
     "react": "^19.2.0",
+    "react-aria-components": "^1.22.1",
     "react-dom": "^19.2.0",
+    "tailwind-merge": "^3.7.0",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {

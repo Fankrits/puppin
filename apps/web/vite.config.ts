@@ -21,6 +21,9 @@ const config = defineConfig({
     options: { typeAware: true, typeCheck: true },
   },
   resolve: { tsconfigPaths: true },
+  ssr: {
+    noExternal: ["@medusajs/js-sdk"],
+  },
   plugins: lazyPlugins(() => [devtools(), nitro(), tailwindcss(), tanstackStart(), viteReact()]),
 });
 
