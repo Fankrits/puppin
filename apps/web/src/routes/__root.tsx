@@ -1,4 +1,4 @@
-import { HeadContent, Scripts, createRootRouteWithContext, Outlet } from "@tanstack/react-router";
+import { HeadContent, Scripts, createRootRouteWithContext } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -61,11 +61,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="min-h-screen bg-neutral-50/50 text-neutral-900 font-sans antialiased">
-        <QueryClientProvider client={queryClient}>
-          {children}
-          <Outlet />
-        </QueryClientProvider>
+      <body className="min-h-screen bg-paper text-ink font-sans antialiased">
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 
         <TanStackDevtools
           config={{
