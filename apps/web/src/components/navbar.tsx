@@ -33,11 +33,9 @@ export function Navbar({
             params={{ countryCode: currentCountryCode }}
             className="flex items-center gap-2 group"
           >
-            <div className="h-8 w-8 rounded-lg bg-neutral-900 text-white flex items-center justify-center font-bold text-lg tracking-wider">
-              P
-            </div>
+            <img src="/logo.svg" alt="Puppin Logo" className="h-8 w-8 object-contain" />
             <span className="text-xl font-bold tracking-tight text-neutral-900 group-hover:text-neutral-700 transition-colors">
-              PUPPIN
+              Puppin
             </span>
           </Link>
 

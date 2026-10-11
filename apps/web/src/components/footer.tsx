@@ -6,7 +6,10 @@ export function Footer({ countryCode }: { countryCode: string }) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-3">
-            <span className="text-lg font-bold tracking-tight text-neutral-900">PUPPIN</span>
+            <div className="flex items-center gap-2">
+              <img src="/logo.svg" alt="Puppin Logo" className="h-7 w-7 object-contain" />
+              <span className="text-lg font-bold tracking-tight text-neutral-900">Puppin</span>
+            </div>
             <p className="text-xs text-neutral-500 max-w-xs leading-relaxed">
               Curated premium lifestyle, apparel, and goods powered by Medusa v2 and TanStack Start.
             </p>

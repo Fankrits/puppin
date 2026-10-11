@@ -30,7 +30,7 @@ export const Route = createRootRouteWithContext<{
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "Puppin Store — Modern Commerce",
+        title: "Puppin",
       },
     ],
     links: [
