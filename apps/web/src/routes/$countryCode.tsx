@@ -2,6 +2,7 @@ import { createFileRoute, redirect, Outlet } from "@tanstack/react-router";
 import { listRegions } from "../lib/data/regions";
 import { listCategories } from "../lib/data/products";
 import { CartProvider } from "../lib/context/cart";
+import { AuthProvider } from "../lib/context/auth";
 import { Navbar } from "../components/navbar";
 import { Footer } from "../components/footer";
 import { CartDrawer } from "../components/cart-drawer";
@@ -50,15 +51,17 @@ function CountryLayout() {
   const { countryCode, region, regions, categories } = Route.useLoaderData();
 
   return (
-    <CartProvider regionId={region?.id}>
-      <div className="flex min-h-screen flex-col">
-        <Navbar regions={regions} currentCountryCode={countryCode} categories={categories} />
-        <main className="flex-1">
-          <Outlet />
-        </main>
-        <Footer countryCode={countryCode} />
-        <CartDrawer countryCode={countryCode} />
-      </div>
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider regionId={region?.id}>
+        <div className="flex min-h-screen flex-col">
+          <Navbar regions={regions} currentCountryCode={countryCode} categories={categories} />
+          <main className="flex-1">
+            <Outlet />
+          </main>
+          <Footer countryCode={countryCode} />
+          <CartDrawer countryCode={countryCode} />
+        </div>
+      </CartProvider>
+    </AuthProvider>
   );
 }

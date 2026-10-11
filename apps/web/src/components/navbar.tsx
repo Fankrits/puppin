@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useCart } from "../lib/context/cart";
+import { useAuth } from "../lib/context/auth";
 import type { HttpTypes } from "@medusajs/types";
-import { ShoppingBag, Globe } from "lucide-react";
+import { ShoppingBag, Globe, User } from "lucide-react";
 
 export function Navbar({
   regions,
@@ -13,6 +14,7 @@ export function Navbar({
   categories?: HttpTypes.StoreProductCategory[];
 }) {
   const { totalItems, openDrawer } = useCart();
+  const { customer, isAuthenticated } = useAuth();
 
   // Collect countries from all regions
   const allCountries = regions.flatMap((r) =>
@@ -61,8 +63,8 @@ export function Navbar({
           </nav>
         </div>
 
-        {/* Right Action Icons (Country Selector, Cart Badge) */}
-        <div className="flex items-center gap-4">
+        {/* Right Action Icons (Country Selector, User Account, Cart Badge) */}
+        <div className="flex items-center gap-3 sm:gap-4">
           {/* Region / Country Selector */}
           {allCountries.length > 0 && (
             <div className="relative group">
@@ -91,6 +93,19 @@ export function Navbar({
               </div>
             </div>
           )}
+
+          {/* Customer Account / Sign In */}
+          <Link
+            to={isAuthenticated ? "/$countryCode/account" : "/$countryCode/account/login"}
+            params={{ countryCode: currentCountryCode }}
+            className="flex items-center gap-1.5 p-2 rounded-lg text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 transition-colors cursor-pointer min-h-[44px] min-w-[44px]"
+            aria-label={isAuthenticated ? "Customer Account" : "Sign In"}
+          >
+            <User className="h-5 w-5" />
+            <span className="hidden sm:inline text-xs font-medium">
+              {isAuthenticated ? customer?.first_name || "Account" : "Sign in"}
+            </span>
+          </Link>
 
           {/* Cart Trigger with aria-live="polite" */}
           <button

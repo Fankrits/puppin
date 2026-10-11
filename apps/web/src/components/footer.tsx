@@ -38,6 +38,15 @@ export function Footer({ countryCode }: { countryCode: string }) {
                   Shopping Cart
                 </Link>
               </li>
+              <li>
+                <Link
+                  to="/$countryCode/account"
+                  params={{ countryCode }}
+                  className="hover:text-neutral-900 transition-colors"
+                >
+                  My Account
+                </Link>
+              </li>
             </ul>
           </div>
 

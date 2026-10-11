@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCart } from "../../lib/context/cart";
+import { useAuth } from "../../lib/context/auth";
 import { formatPrice } from "../../lib/utils/price";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
-import { useState } from "react";
-import { ShieldCheck, ArrowLeft, AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ShieldCheck, ArrowLeft, AlertCircle, User, Check } from "lucide-react";
 import type { HttpTypes } from "@medusajs/types";
 import {
   updateCartAddresses,
@@ -23,6 +24,7 @@ function CheckoutPage() {
   const { countryCode } = Route.useParams();
   const navigate = useNavigate();
   const { cart, totalItems, setCartData, refreshCart } = useCart();
+  const { customer, isAuthenticated } = useAuth();
   const currencyCode = cart?.currency_code || "eur";
 
   const [step, setStep] = useState<"address" | "delivery" | "payment">("address");
@@ -35,17 +37,30 @@ function CheckoutPage() {
   const [paymentProviders, setPaymentProviders] = useState<HttpTypes.StorePaymentProvider[]>([]);
   const [selectedProviderId, setSelectedProviderId] = useState<string | null>(null);
 
-  // Address form fields pre-filled from existing cart addresses
+  // Address form fields pre-filled from existing cart or logged in customer
   const [formData, setFormData] = useState({
-    email: cart?.email || "",
-    firstName: cart?.shipping_address?.first_name || "",
-    lastName: cart?.shipping_address?.last_name || "",
+    email: cart?.email || customer?.email || "",
+    firstName: cart?.shipping_address?.first_name || customer?.first_name || "",
+    lastName: cart?.shipping_address?.last_name || customer?.last_name || "",
     address: cart?.shipping_address?.address_1 || "",
     city: cart?.shipping_address?.city || "",
     postalCode: cart?.shipping_address?.postal_code || "",
     country: (cart?.shipping_address?.country_code || countryCode).toUpperCase(),
-    phone: cart?.shipping_address?.phone || "",
+    phone: cart?.shipping_address?.phone || customer?.phone || "",
   });
+
+  // Keep form data synced if customer loads after initial render
+  useEffect(() => {
+    if (customer) {
+      setFormData((prev) => ({
+        ...prev,
+        email: prev.email || customer.email || "",
+        firstName: prev.firstName || customer.first_name || "",
+        lastName: prev.lastName || customer.last_name || "",
+        phone: prev.phone || customer.phone || "",
+      }));
+    }
+  }, [customer]);
 
   // Step 1: Submit Address to Medusa backend
   const handleAddressSubmit = async (e: React.FormEvent) => {
@@ -196,6 +211,49 @@ function CheckoutPage() {
         <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 flex items-center gap-3 text-sm text-red-700">
           <AlertCircle className="h-5 w-5 flex-shrink-0 text-red-500" />
           <span>{errorMessage}</span>
+        </div>
+      )}
+
+      {/* Customer authentication prompt / status */}
+      {!isAuthenticated ? (
+        <div className="mb-8 rounded-2xl border border-neutral-200 bg-neutral-50/70 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-neutral-200 text-neutral-700">
+              <User className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-neutral-900">Already have an account?</p>
+              <p className="text-xs text-neutral-500">
+                Sign in for faster checkout and saved order tracking.
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/$countryCode/account/login"
+            params={{ countryCode }}
+            className="inline-flex items-center justify-center rounded-lg border border-neutral-300 bg-white px-4 py-2 text-xs font-semibold text-neutral-800 hover:bg-neutral-50 hover:text-neutral-900 transition-colors shadow-2xs"
+          >
+            Sign in to your account
+          </Link>
+        </div>
+      ) : (
+        <div className="mb-8 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+              <Check className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-emerald-900">
+                Checking out as{" "}
+                {customer?.first_name
+                  ? `${customer.first_name} (${customer.email})`
+                  : customer?.email}
+              </p>
+              <p className="text-[11px] text-emerald-700">
+                This order will automatically link to your account.
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
