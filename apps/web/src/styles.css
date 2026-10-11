@@ -1,15 +1,104 @@
 @import "tailwindcss";
+@import "@fontsource-variable/anybody/standard.css";
+@import "@fontsource-variable/anuphan";
+@import "@fontsource/kanit/thai-800.css";
 
-* {
-  box-sizing: border-box;
+@theme {
+  --font-sans: "Anuphan Variable", "Anuphan", ui-sans-serif, system-ui, sans-serif;
+  /* Latin display in Anybody; Thai glyphs fall through to Kanit */
+  --font-display: "Anybody Variable", "Kanit", "Anuphan Variable", sans-serif;
+
+  --color-ink: #121212;
+  --color-ink-soft: #4a4a48;
+  --color-paper: #ffffff;
+  --color-mist: #f4f4f2;
+  --color-line: #e4e4e0;
+  --color-puppin: #d63a2c;
+  --color-puppin-deep: #b42c20;
+  --color-sprout: #c8e6d6;
+  --color-sprout-deep: #24583c;
+  --color-spike: #f08a3e;
+  --color-peach: #f6b796;
 }
 
-html,
-body,
-#app {
-  min-height: 100%;
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #app {
+    min-height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    caret-color: var(--color-puppin);
+  }
+
+  ::selection {
+    background: var(--color-puppin);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-puppin);
+    outline-offset: 3px;
+  }
+
+  a {
+    text-underline-offset: 0.2em;
+  }
+
+  html {
+    scrollbar-color: #c9c9c4 var(--color-paper);
+  }
 }
 
-body {
-  margin: 0;
+@utility font-display-tight {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-stretch: 62%;
+  text-transform: uppercase;
+  line-height: 0.88;
+  letter-spacing: -0.01em;
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hero Puppin hops once each time something lands in the cart */
+@keyframes puppin-hop {
+  0% {
+    transform: translateY(0) scale(1, 1);
+  }
+  18% {
+    transform: translateY(2%) scale(1.04, 0.95);
+  }
+  45% {
+    transform: translateY(-9%) scale(0.97, 1.04);
+  }
+  70% {
+    transform: translateY(0) scale(1.03, 0.97);
+  }
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+}
+
+.puppin-hop {
+  transform-origin: 50% 100%;
+  animation: puppin-hop 620ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .puppin-hop {
+    animation: none;
+  }
 }

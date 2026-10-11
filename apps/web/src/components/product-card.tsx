@@ -22,25 +22,26 @@ export function ProductCard({
     <Link
       to="/$countryCode/products/$handle"
       params={{ countryCode, handle: product.handle }}
-      className="group flex flex-col rounded-xl overflow-hidden bg-white border border-neutral-200/80 hover:border-neutral-300 hover:shadow-md transition-all duration-200"
+      className="group flex flex-col gap-3 rounded-2xl"
     >
       {/* Product Image */}
-      <div className="relative aspect-square w-full overflow-hidden bg-neutral-100">
+      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-mist">
         {product.thumbnail ? (
           <img
             src={product.thumbnail}
-            alt={product.title || "Product Image"}
+            alt={product.title || "Product image"}
             loading="lazy"
-            className="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-300 ease-out"
+            className="h-full w-full object-cover object-center transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-neutral-400 text-sm">
-            No image available
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-ink-soft">
+            <img src="/logo.svg" alt="" className="h-14 w-14 opacity-25" />
+            <span className="text-sm">Photo coming soon</span>
           </div>
         )}
 
         {hasDiscount && (
-          <div className="absolute top-2.5 left-2.5">
+          <div className="absolute top-3 left-3">
             <Badge variant="error" size="sm">
               Sale
             </Badge>
@@ -49,30 +50,30 @@ export function ProductCard({
       </div>
 
       {/* Details */}
-      <div className="flex flex-1 flex-col p-4 justify-between">
-        <div>
-          <h3 className="text-sm font-semibold text-neutral-900 group-hover:text-neutral-700 transition-colors line-clamp-1">
+      <div className="flex flex-col gap-0.5 px-1 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+        <div className="min-w-0">
+          <h3 className="text-base font-semibold text-ink line-clamp-2 decoration-2 group-hover:underline">
             {product.title}
           </h3>
           {product.subtitle && (
-            <p className="text-xs text-neutral-500 mt-0.5 line-clamp-1">{product.subtitle}</p>
+            <p className="text-sm text-ink-soft mt-0.5 line-clamp-1">{product.subtitle}</p>
           )}
         </div>
 
-        <div className="mt-3 flex items-baseline gap-2">
+        <div className="flex shrink-0 flex-col sm:items-end">
           {calculatedPrice !== undefined && calculatedPrice !== null ? (
             <>
-              <span className="text-sm font-bold text-neutral-900">
+              <span className="tabular text-base font-semibold text-ink">
                 {formatPrice(calculatedPrice, currencyCode)}
               </span>
               {hasDiscount && (
-                <span className="text-xs text-neutral-400 line-through">
+                <span className="tabular text-sm text-ink-soft line-through">
                   {formatPrice(originalPrice, currencyCode)}
                 </span>
               )}
             </>
           ) : (
-            <span className="text-xs text-neutral-500">Contact for pricing</span>
+            <span className="text-sm text-ink-soft">Price on request</span>
           )}
         </div>
       </div>

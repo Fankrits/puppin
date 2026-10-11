@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Category standard</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+      body {
+        width: 1440px;
+        height: 900px;
+        overflow: hidden;
+        background: #fff;
+        font-family: Anuphan, sans-serif;
+        color: #111;
+      }
+      header {
+        height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 48px;
+        border-bottom: 1px solid #eee;
+      }
+      header b {
+        font-size: 26px;
+        letter-spacing: 0.04em;
+      }
+      header nav {
+        display: flex;
+        gap: 28px;
+        font-size: 15px;
+      }
+      .hero {
+        position: relative;
+        height: 560px;
+        margin: 0 48px;
+        margin-top: 24px;
+        border-radius: 6px;
+        overflow: hidden;
+        background: #ede9e4;
+      }
+      .hero img {
+        position: absolute;
+        right: 120px;
+        bottom: -40px;
+        height: 600px;
+        mix-blend-mode: multiply;
+      }
+      .copy {
+        position: absolute;
+        left: 64px;
+        top: 150px;
+        width: 560px;
+      }
+      .copy h1 {
+        font-size: 72px;
+        line-height: 1.02;
+        font-weight: 700;
+      }
+      .copy p {
+        margin-top: 18px;
+        font-size: 20px;
+        color: #555;
+      }
+      .copy a {
+        display: inline-block;
+        margin-top: 28px;
+        background: #111;
+        color: #fff;
+        padding: 18px 34px;
+        font-size: 18px;
+        border-radius: 4px;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+        margin: 28px 48px 0;
+      }
+      .row div {
+        height: 200px;
+        background: #f4f4f4;
+        border-radius: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <b>PUPPIN</b>
+      <nav><span>ใหม่</span><span>เสื้อ</span><span>กางเกง</span><span>ตะกร้า</span></nav>
+    </header>
+    <section class="hero">
+      <div class="copy">
+        <h1>Everyday clothes, made properly.</h1>
+        <p>เสื้อผ้าออกแบบเองจาก Puppin</p>
+        <a>Shop new in</a>
+      </div>
+      <img src="puppin-plush.png" alt="" />
+    </section>
+    <div class="row">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </body>
+</html>

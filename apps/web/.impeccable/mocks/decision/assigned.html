@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Label Room</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,400..900&family=Kanit:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --red: #d63a2c;
+        --red-deep: #b32a1f;
+        --cotton: #f3f4f1;
+        --indigo: #1f2b57;
+        --spike: #f08a3e;
+        --peach: #f4a27e;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+      body {
+        width: 1440px;
+        height: 900px;
+        overflow: hidden;
+        background: var(--cotton);
+        color: var(--indigo);
+        font-family: Kanit, sans-serif;
+      }
+      /* woven label masthead */
+      .band {
+        height: 118px;
+        background: var(--red);
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 56px;
+        background-image:
+          repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.05) 0 2px, transparent 2px 4px),
+          repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 3px);
+      }
+      .band::before,
+      .band::after {
+        content: "";
+        position: absolute;
+        left: 20px;
+        right: 20px;
+        border-top: 2px dashed rgba(255, 255, 255, 0.55);
+      }
+      .band::before {
+        top: 12px;
+      }
+      .band::after {
+        bottom: 12px;
+      }
+      .mark {
+        font-family: Anybody;
+        font-stretch: 130%;
+        font-weight: 900;
+        font-size: 64px;
+        letter-spacing: 0.06em;
+        color: #fff;
+      }
+      nav {
+        display: flex;
+        gap: 36px;
+        color: #fff;
+        font-size: 17px;
+        font-weight: 600;
+      }
+      nav span:last-child {
+        border: 2px solid #fff;
+        padding: 6px 16px;
+        border-radius: 2px;
+      }
+      /* full-measure head */
+      h1 {
+        font-family: Anybody;
+        font-stretch: 62%;
+        font-weight: 900;
+        font-size: 150px;
+        line-height: 0.86;
+        letter-spacing: -0.01em;
+        text-transform: uppercase;
+        padding: 34px 48px 0;
+        white-space: nowrap;
+      }
+      h1 em {
+        font-style: normal;
+        color: var(--red);
+      }
+      .th {
+        padding: 10px 52px 0;
+        font-size: 26px;
+        font-weight: 600;
+        color: var(--indigo);
+        opacity: 0.8;
+      }
+      /* cutting table */
+      .table {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 470px;
+      }
+      .rule {
+        position: absolute;
+        left: 48px;
+        right: 48px;
+        top: 28px;
+        border-top: 2px dashed rgba(31, 43, 87, 0.3);
+      }
+      .stack {
+        position: absolute;
+        left: 120px;
+        bottom: 40px;
+        width: 520px;
+      }
+      .fold {
+        height: 46px;
+        border-radius: 6px;
+        margin-top: 6px;
+        box-shadow: 0 2px 0 rgba(0, 0, 0, 0.08) inset;
+      }
+      .f1 {
+        background: #e9e6dd;
+      }
+      .f2 {
+        background: var(--indigo);
+      }
+      .f3 {
+        background: #e9e6dd;
+      }
+      .f4 {
+        background: var(--spike);
+      }
+      .puppin {
+        position: absolute;
+        left: 150px;
+        bottom: 210px;
+        width: 440px;
+        mix-blend-mode: multiply;
+      }
+      /* hang tag */
+      .tag {
+        position: absolute;
+        left: 760px;
+        top: 70px;
+        width: 360px;
+        height: 380px;
+        background: #fff;
+        border-radius: 10px 10px 10px 10px;
+        padding: 44px 30px 28px;
+        transform: rotate(-3deg);
+        box-shadow: 0 18px 40px rgba(31, 43, 87, 0.12);
+        border: 1px solid rgba(31, 43, 87, 0.12);
+      }
+      .tag::before {
+        content: "";
+        position: absolute;
+        top: 14px;
+        left: 50%;
+        width: 16px;
+        height: 16px;
+        margin-left: -8px;
+        border-radius: 50%;
+        background: var(--cotton);
+        border: 2px solid rgba(31, 43, 87, 0.25);
+      }
+      .string {
+        position: absolute;
+        left: 930px;
+        top: -10px;
+        width: 2px;
+        height: 90px;
+        background: var(--indigo);
+        opacity: 0.5;
+        transform: rotate(-14deg);
+        transform-origin: top;
+      }
+      .tag h2 {
+        font-family: Anybody;
+        font-stretch: 80%;
+        font-weight: 900;
+        font-size: 40px;
+        text-transform: uppercase;
+        line-height: 1;
+      }
+      .tag p {
+        font-size: 15px;
+        margin-top: 8px;
+        opacity: 0.75;
+      }
+      .sizes {
+        display: flex;
+        gap: 10px;
+        margin-top: 22px;
+      }
+      .sizes span {
+        width: 52px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        font-weight: 600;
+        border: 2px dashed rgba(31, 43, 87, 0.4);
+        border-radius: 4px;
+      }
+      .sizes .on {
+        border: 2px solid var(--indigo);
+        background: var(--indigo);
+        color: #fff;
+      }
+      .sizes .out {
+        text-decoration: line-through;
+        opacity: 0.35;
+        border-style: dotted;
+      }
+      .price {
+        font-family: Anybody;
+        font-weight: 900;
+        font-size: 44px;
+        margin-top: 22px;
+      }
+      .cta {
+        margin-top: 16px;
+        height: 58px;
+        background: var(--red);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: 800;
+        border-radius: 4px;
+        outline: 2px dashed rgba(255, 255, 255, 0.6);
+        outline-offset: -7px;
+      }
+      /* QC slip */
+      .qc {
+        position: absolute;
+        left: 1180px;
+        top: 190px;
+        width: 200px;
+        height: 230px;
+        background: #fff7da;
+        transform: rotate(5deg);
+        padding: 20px;
+        border: 1px solid rgba(31, 43, 87, 0.2);
+      }
+      .qc b {
+        display: block;
+        font-family: Anybody;
+        font-stretch: 70%;
+        font-weight: 900;
+        font-size: 30px;
+        text-transform: uppercase;
+        line-height: 1;
+      }
+      .qc i {
+        display: block;
+        margin-top: 14px;
+        font-style: normal;
+        font-size: 15px;
+      }
+      .stamp {
+        margin-top: 22px;
+        width: 120px;
+        height: 120px;
+        border: 4px solid var(--red);
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: var(--red);
+        font-family: Anybody;
+        font-weight: 900;
+        font-size: 24px;
+        transform: rotate(-12deg);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="band">
+      <div class="mark">PUPPIN</div>
+      <nav>
+        <span>เสื้อ</span><span>กางเกง</span><span>คอลเลกชัน</span><span>บัญชี</span
+        ><span>ตะกร้า 0</span>
+      </nav>
+    </header>
+    <h1>Cute brand. <em>Serious</em> clothes.</h1>
+    <p class="th">น่ารักที่ตัวละคร จริงจังที่ตะเข็บ</p>
+    <section class="table">
+      <div class="rule"></div>
+      <img class="puppin" src="puppin-plush.png" alt="" />
+      <div class="stack">
+        <div class="fold f1"></div>
+        <div class="fold f2"></div>
+        <div class="fold f3"></div>
+        <div class="fold f4"></div>
+      </div>
+      <div class="string"></div>
+      <div class="tag">
+        <h2>Sprout Tee</h2>
+        <p>Cotton · Regular fit · Short sleeve</p>
+        <div class="sizes">
+          <span>S</span><span class="on">M</span><span>L</span><span class="out">XL</span>
+        </div>
+        <div class="price">฿890</div>
+        <div class="cta">ใส่ตะกร้า · Add to cart</div>
+      </div>
+      <div class="qc">
+        <b>Inspected by Puppin</b><i>ตรวจแล้ว No. 01</i>
+        <div class="stamp">OK!</div>
+      </div>
+    </section>
+  </body>
+</html>

@@ -15,6 +15,9 @@
     "staged": "bun --bun vp staged"
   },
   "dependencies": {
+    "@fontsource-variable/anuphan": "^5.3.0",
+    "@fontsource-variable/anybody": "^5.3.0",
+    "@fontsource/kanit": "^5.3.0",
     "@medusajs/icons": "2.21.2",
     "@medusajs/js-sdk": "2.21.2",
     "@medusajs/types": "2.21.2",
@@ -36,6 +39,7 @@
     "react": "^19.2.0",
     "react-aria-components": "^1.22.1",
     "react-dom": "^19.2.0",
+    "sharp": "^0.35.5",
     "tailwind-merge": "^3.7.0",
     "tailwindcss": "^4.1.18"
   },
