@@ -13,15 +13,23 @@ bun install
 To run the application:
 
 ```bash
-bun run dev
+bun run dev:web      # Start web app (TanStack Start)
+bun run dev:medusa   # Start Medusa backend
 ```
 
 # Building For Production
 
-To build this application for production:
+To build all workspaces for production:
 
 ```bash
 bun run build
+```
+
+Or build individually:
+
+```bash
+bun run build:web
+bun run build:medusa
 ```
 
 To preview the production build:

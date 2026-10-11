@@ -8,11 +8,17 @@
   ],
   "packageManager": "bun@1.4.3",
   "scripts": {
-    "dev": "bun --filter @puppin/web dev",
-    "build": "bun --filter @puppin/web build",
-    "preview": "bun --filter @puppin/web preview",
+    "dev:web": "bun --filter @puppin/web dev",
+    "build:web": "bun --filter @puppin/web build",
+    "preview:web": "bun --filter @puppin/web preview",
+    "check:web": "bun --filter @puppin/web check",
+    "generate-routes": "bun --filter @puppin/web generate-routes",
+    "dev:medusa": "bun --filter @puppin/medusa dev",
+    "build:medusa": "bun --filter @puppin/medusa build",
+    "start:medusa": "bun --filter @puppin/medusa start",
     "check": "bun --filter @puppin/web check",
-    "generate-routes": "bun --filter @puppin/web generate-routes"
+    "dev": "bun --filter @puppin/web dev",
+    "build": "bun --filter '*' build"
   },
   "devDependencies": {
     "typescript": "^6.0.2"

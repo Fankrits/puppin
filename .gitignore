@@ -9,6 +9,10 @@ dist-ssr
 .wrangler
 .output
 .vinxi
+.medusa
+.cache
+medusa-db.sql
+uploads
 __unconfig*
 todos.json
 
