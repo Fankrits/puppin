@@ -37,6 +37,7 @@ Search is critical for ecommerce - users with search intent convert at higher ra
 **Show suggestions** after 2-3 characters (not 1). Debounce 300ms to prevent excessive API calls.
 
 **Display 5-10 product suggestions:**
+
 - Small image (40-60px), title, price
 - Clickable to product page
 - Optional: Category/brand suggestions, popular terms
@@ -72,6 +73,7 @@ Display both on: Empty input focus (desktop dropdown), mobile modal open.
 ## Mobile Search
 
 **Full-screen modal pattern:**
+
 - Header: Back button (44x44px) + search input (48px height, auto-focus, `type="search"`)
 - Content: Recent/popular searches (empty), autocomplete (typing), scrollable
 - Close: Back button, device back gesture, Escape key

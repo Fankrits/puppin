@@ -1,12 +1,11 @@
 {
   "name": "puppin",
   "private": true,
-  "type": "module",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
-  "packageManager": "bun@1.4.3",
+  "type": "module",
   "scripts": {
     "dev:web": "bun --filter @puppin/web dev",
     "build:web": "bun --filter @puppin/web build",
@@ -22,10 +21,21 @@
     "db:migrate": "bun --filter @puppin/medusa db:migrate",
     "user:medusa": "bun --filter @puppin/medusa user",
     "check": "bun --filter @puppin/web check",
+    "test": "bun test",
+    "lint": "oxlint",
+    "fmt": "oxfmt .",
+    "fmt:check": "oxfmt --check .",
     "dev": "bun --filter '*' dev",
     "build": "bun --filter '*' build"
   },
   "devDependencies": {
+    "oxfmt": "^0.72.0",
+    "oxlint": "^1.87.0",
     "typescript": "^6.0.2"
-  }
+  },
+  "overrides": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0"
+  },
+  "packageManager": "bun@1.4.3"
 }

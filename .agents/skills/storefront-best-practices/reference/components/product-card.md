@@ -29,12 +29,14 @@ Product cards display products in grids (product listings, search results, relat
 ### Regular vs Sale Pricing
 
 **Sale price display:**
+
 - Sale price: Larger, bold, red or accent color
 - Original price: Smaller, struck through (~~$79.99~~), gray
 - Position sale price before original price
 - Optional: Show discount percentage badge (-20%)
 
 **Format consistently:**
+
 - Always include currency symbol ($49.99)
 - Consistent decimals ($49.99 not $49.9 or $50)
 - For Medusa: Display prices as-is (no divide by 100)
@@ -42,6 +44,7 @@ Product cards display products in grids (product listings, search results, relat
 ### Price Range (Multiple Variants)
 
 **When variants have different prices:**
+
 - Show "From $49" or "$49 - $79"
 - Makes it clear price varies by selection
 - Don't show range if all variants same price
@@ -59,11 +62,13 @@ Product cards display products in grids (product listings, search results, relat
 3. **Quick View modal** - Variant selector in modal. Good middle ground (desktop only).
 
 **Decision:**
+
 - Simple products (1-2 variants): Add first variant
 - Fashion/apparel with sizes: Require size selection (redirect or Quick View)
 - Complex products (3+ variant types): Redirect to product page
 
 **Button behavior:**
+
 - Loading state ("Adding..."), disable during loading
 - Optimistic UI update (cart count immediately)
 - Success feedback (toast, cart popup, or checkmark)
@@ -88,6 +93,7 @@ Product cards display products in grids (product listings, search results, relat
 ### Grid Layout
 
 **Mobile-specific adjustments:**
+
 - 2 columns maximum on mobile (never 3+)
 - Larger touch targets (44px minimum for buttons)
 - Always show "Add to Cart" button (no hover-only)
@@ -97,6 +103,7 @@ Product cards display products in grids (product listings, search results, relat
 ### Touch Interactions
 
 **No hover states on mobile:**
+
 - Don't hide actions behind hover
 - Always show primary button
 - Use tap states (active state) instead of hover

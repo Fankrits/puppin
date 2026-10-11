@@ -1,10 +1,5 @@
 import type { SearchTypes } from "@medusajs/framework/types";
-import {
-  defineSearchIndex,
-  graphConsume,
-  graphSeed,
-  search,
-} from "@medusajs/framework/utils";
+import { defineSearchIndex, graphConsume, graphSeed, search } from "@medusajs/framework/utils";
 
 import { ProductOptionRow, toOptionValues } from "./helpers/option-values";
 import { loadPricing, priceFields, toProductPricing } from "./helpers/pricing";
@@ -63,9 +58,7 @@ const productFields = search.define({
   ...priceFields,
 });
 
-type ProductDocument = SearchTypes.InferSearchDocumentType<
-  typeof productFields
->;
+type ProductDocument = SearchTypes.InferSearchDocumentType<typeof productFields>;
 
 function toDocument(
   product: ProductRow,
@@ -104,10 +97,7 @@ function toDocument(
  */
 const source = {
   fields: PRODUCT_GRAPH_FIELDS,
-  transform: async (
-    rows: ProductRow[],
-    context: SearchTypes.SearchIngestionContext,
-  ) => {
+  transform: async (rows: ProductRow[], context: SearchTypes.SearchIngestionContext) => {
     const pricing = await loadPricing(
       rows.map((row) => row.id),
       context,
@@ -157,9 +147,9 @@ export default defineSearchIndex({
   },
   events: PRODUCT_EVENTS,
   consume: graphConsume<typeof productFields, ProductRow>({
-    ...source,
-    resolve_ids: resolveProductIds,
+    ...(source as any),
+    resolve_ids: resolveProductIds as any,
     is_delete: (event) => event.name === "product.deleted",
   }),
-  seed: graphSeed<typeof productFields, ProductRow>(source),
+  seed: graphSeed<typeof productFields, ProductRow>(source as any),
 });

@@ -46,6 +46,7 @@ Enables rich results in search (star ratings, price, availability shown directly
 Implement schema.org Product structured data with these critical fields:
 
 **Essential fields:**
+
 - `name`, `description`, `image`, `sku`, `brand`
 - `offers` object with:
   - `price`: Current price (Medusa: use as-is; other backends: check format)
@@ -58,6 +59,7 @@ Implement schema.org Product structured data with these critical fields:
 ### AggregateRating Schema (When Reviews Exist)
 
 Add `aggregateRating` object to Product schema when real reviews exist:
+
 - `ratingValue`: Average rating (e.g., "4.5")
 - `reviewCount`: Total number of reviews
 - `bestRating`: "5", `worstRating`: "1"
@@ -67,6 +69,7 @@ Displays star ratings in search results - powerful for CTR. **Only use for real 
 ### Breadcrumb Schema (Navigation Hierarchy)
 
 Implement schema.org BreadcrumbList showing category hierarchy:
+
 - Home → Category → Product
 - Each level has `position`, `name`, `item` URL
 - Helps search engines understand site structure
@@ -80,6 +83,7 @@ Add on homepage only: Organization name, URL, logo, contact information. Helps e
 **Product URLs**: Use readable slugs with hyphens (`/products/wireless-headphones-pro`). Include keywords naturally, keep short (<75 characters), never change URLs.
 
 **Category URLs**: Choose consistent structure:
+
 - Hierarchical (`/categories/electronics/laptops`) for deep catalogs
 - Flat (`/categories/laptops`) for simpler management
 - Don't mix both approaches
@@ -89,6 +93,7 @@ Add on homepage only: Organization name, URL, logo, contact information. Helps e
 **Filter URLs**: Use query parameters (`/products?color=blue&size=large`).
 
 **Canonical decision for filters:**
+
 - Few filters (2-3): Index filtered pages (primary navigation)
 - Many filters (5+): Canonical to unfiltered (prevents duplicate content)
 - Popular combinations: Consider indexing separately
@@ -106,6 +111,7 @@ Add on homepage only: Organization name, URL, logo, contact information. Helps e
 ### Ecommerce Duplicate Content Challenges
 
 **Common scenarios:**
+
 1. **Product variants**: Same product in multiple colors/sizes
 2. **Multiple categories**: Product listed in multiple categories
 3. **Filter combinations**: Filtered views create unique URLs
@@ -114,19 +120,23 @@ Add on homepage only: Organization name, URL, logo, contact information. Helps e
 ### Solution: Canonical URLs
 
 **Variant handling:**
+
 - Choose one variant as canonical (usually default)
 - All other variants canonical to that one
 - Example: Blue, Red, Green shirts all canonical to Blue (default)
 
 **Multiple category paths:**
+
 - Choose one category as canonical (usually primary category)
 - Example: Product in both "Electronics" and "Laptops" → canonical to "Laptops"
 
 **Filtered/sorted views:**
+
 - Canonical to unfiltered, default-sorted page
 - Example: `/products?color=blue&sort=price` → canonical to `/products`
 
 **Implementation:**
+
 ```html
 <!-- On variant page (Red shirt) -->
 <link rel="canonical" href="https://yourstore.com/products/cotton-tshirt" />
@@ -140,6 +150,7 @@ Add on homepage only: Organization name, URL, logo, contact information. Helps e
 Generate sitemaps dynamically from database to help search engines discover all products and categories.
 
 **Requirements:**
+
 - Include all public product and category pages
 - Update `lastModified` when products change (fetch from database)
 - Exclude `noindex` pages and filtered/sorted URLs

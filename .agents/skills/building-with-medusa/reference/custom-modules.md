@@ -1,6 +1,7 @@
 # Custom Modules
 
 ## Contents
+
 - [When to Create a Custom Module](#when-to-create-a-custom-module)
 - [Module Structure](#module-structure)
 - [Creating a Custom Module - Implementation Checklist](#creating-a-custom-module---implementation-checklist)
@@ -50,18 +51,18 @@ Create these tasks in your todo list:
 
 ```typescript
 // src/modules/blog/models/post.ts
-import { model } from "@medusajs/framework/utils"
+import { model } from "@medusajs/framework/utils";
 
 const Post = model.define("post", {
   id: model.id().primaryKey(),
   title: model.text(),
   content: model.text().nullable(),
   published: model.boolean().default(false),
-})
+});
 
 // note models automatically get created_at, updated_at and deleted_at added - don't add these explicitly
 
-export default Post
+export default Post;
 ```
 
 **Data model reference**: See [data-models.md](data-models.md)
@@ -70,14 +71,14 @@ export default Post
 
 ```typescript
 // src/modules/blog/service.ts
-import { MedusaService } from "@medusajs/framework/utils"
-import Post from "./models/post"
+import { MedusaService } from "@medusajs/framework/utils";
+import Post from "./models/post";
 
 class BlogModuleService extends MedusaService({
   Post,
 }) {}
 
-export default BlogModuleService
+export default BlogModuleService;
 ```
 
 The service extends `MedusaService` which auto-generates CRUD methods for each data model.
@@ -86,17 +87,18 @@ The service extends `MedusaService` which auto-generates CRUD methods for each d
 
 ```typescript
 // src/modules/blog/index.ts
-import BlogModuleService from "./service"
-import { Module } from "@medusajs/framework/utils"
+import BlogModuleService from "./service";
+import { Module } from "@medusajs/framework/utils";
 
-export const BLOG_MODULE = "blog"
+export const BLOG_MODULE = "blog";
 
 export default Module(BLOG_MODULE, {
   service: BlogModuleService,
-})
+});
 ```
 
 **⚠️ CRITICAL - Module Name Format:**
+
 - Module names MUST be in camelCase
 - **NEVER use dashes (kebab-case)** in module names
 - ✅ CORRECT: `"blog"`, `"productReview"`, `"orderTracking"`
@@ -106,12 +108,12 @@ export default Module(BLOG_MODULE, {
 
 ```typescript
 // ❌ WRONG - dashes will break the module
-export const PRODUCT_REVIEW_MODULE = "product-review" // Don't do this!
-export default Module("product-review", { service: ProductReviewService })
+export const PRODUCT_REVIEW_MODULE = "product-review"; // Don't do this!
+export default Module("product-review", { service: ProductReviewService });
 
 // ✅ CORRECT - use camelCase
-export const PRODUCT_REVIEW_MODULE = "productReview"
-export default Module("productReview", { service: ProductReviewService })
+export const PRODUCT_REVIEW_MODULE = "productReview";
+export default Module("productReview", { service: ProductReviewService });
 ```
 
 **Why this matters:** Medusa's internal module resolution uses property access syntax (e.g., `container.resolve("productReview")`), and dashes would break this.
@@ -125,7 +127,7 @@ export default Module("productReview", { service: ProductReviewService })
 module.exports = defineConfig({
   // ...
   modules: [{ resolve: "./src/modules/blog" }],
-})
+});
 ```
 
 ## Steps 5-6: Generate and Run Migrations
@@ -143,11 +145,13 @@ npx medusa db:migrate
 ```
 
 **⚠️ CRITICAL: These are TWO separate commands:**
+
 - ✅ CORRECT: Run `npx medusa db:generate blog` then `npx medusa db:migrate`
 - ❌ WRONG: `npx medusa db:generate blog "create blog module"` (no description parameter!)
 - ❌ WRONG: Combining into one command
 
 **Why this matters:**
+
 - Migrations create the database tables for your module's data models
 - Without migrations, the module service methods (createPosts, listPosts, etc.) will fail
 - You must generate migrations BEFORE running them
@@ -161,12 +165,12 @@ Access your module service in different contexts:
 
 ```typescript
 // In API routes
-const blogService = req.scope.resolve("blog")
-const post = await blogService.createPosts({ title: "Hello World" })
+const blogService = req.scope.resolve("blog");
+const post = await blogService.createPosts({ title: "Hello World" });
 
 // In workflow steps
-const blogService = container.resolve("blog")
-const posts = await blogService.listPosts({ published: true })
+const blogService = container.resolve("blog");
+const posts = await blogService.listPosts({ published: true });
 ```
 
 The module name used in `Module("blog", ...)` becomes the container resolution key.
@@ -177,44 +181,41 @@ The service auto-generates methods for each data model:
 
 ```typescript
 // Create - pass object or array of objects
-const post = await blogService.createPosts({ title: "Hello" })
-const posts = await blogService.createPosts([
-  { title: "One" },
-  { title: "Two" },
-])
+const post = await blogService.createPosts({ title: "Hello" });
+const posts = await blogService.createPosts([{ title: "One" }, { title: "Two" }]);
 
 // Retrieve - by ID, with optional select/relations
-const post = await blogService.retrievePost("post_123")
+const post = await blogService.retrievePost("post_123");
 const post = await blogService.retrievePost("post_123", {
   select: ["id", "title"],
-})
+});
 
 // List - with filters and options
-const posts = await blogService.listPosts()
-const posts = await blogService.listPosts({ published: true })
+const posts = await blogService.listPosts();
+const posts = await blogService.listPosts({ published: true });
 const posts = await blogService.listPosts(
   { published: true }, // filters
-  { take: 20, skip: 0, order: { created_at: "DESC" } } // options
-)
+  { take: 20, skip: 0, order: { created_at: "DESC" } }, // options
+);
 
 // List with count - returns [records, totalCount]
-const [posts, count] = await blogService.listAndCountPosts({ published: true })
+const [posts, count] = await blogService.listAndCountPosts({ published: true });
 
 // Update - by ID or with selector/data pattern
-const post = await blogService.updatePosts({ id: "post_123", title: "Updated" })
+const post = await blogService.updatePosts({ id: "post_123", title: "Updated" });
 const posts = await blogService.updatePosts({
   selector: { published: false },
   data: { published: true },
-})
+});
 
 // Delete - by ID, array of IDs, or filter object
-await blogService.deletePosts("post_123")
-await blogService.deletePosts(["post_123", "post_456"])
-await blogService.deletePosts({ published: false })
+await blogService.deletePosts("post_123");
+await blogService.deletePosts(["post_123", "post_456"]);
+await blogService.deletePosts({ published: false });
 
 // Soft delete / restore
-await blogService.softDeletePosts("post_123")
-await blogService.restorePosts("post_123")
+await blogService.softDeletePosts("post_123");
+await blogService.restorePosts("post_123");
 ```
 
 ## Loaders
@@ -223,18 +224,18 @@ Loaders run when the Medusa application starts. Use them to initialize connectio
 
 ```typescript
 // src/modules/blog/loaders/hello-world.ts
-import { LoaderOptions } from "@medusajs/framework/types"
+import { LoaderOptions } from "@medusajs/framework/types";
 
 export default async function helloWorldLoader({ container }: LoaderOptions) {
-  const logger = container.resolve("logger")
-  logger.info("[BLOG MODULE] Started!")
+  const logger = container.resolve("logger");
+  logger.info("[BLOG MODULE] Started!");
 }
 
 // Export in module definition (src/modules/blog/index.ts)
-import helloWorldLoader from "./loaders/hello-world"
+import helloWorldLoader from "./loaders/hello-world";
 
 export default Module("blog", {
   service: BlogModuleService,
   loaders: [helloWorldLoader],
-})
+});
 ```

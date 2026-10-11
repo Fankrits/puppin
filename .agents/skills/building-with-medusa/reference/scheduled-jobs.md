@@ -3,6 +3,7 @@
 Scheduled jobs are asynchronous functions that run automatically at specified intervals during the Medusa application's runtime. Use them for tasks like syncing products to third-party services, sending periodic reports, or cleaning up stale data.
 
 ## Contents
+
 - [When to Use Scheduled Jobs](#when-to-use-scheduled-jobs)
 - [Creating a Scheduled Job](#creating-a-scheduled-job)
 - [Configuration Options](#configuration-options)
@@ -21,11 +22,13 @@ Use scheduled jobs when you need to perform actions **periodically**:
 - ✅ Recalculating aggregated data
 
 **Don't use scheduled jobs for:**
+
 - ❌ Reacting to events (use [subscribers](subscribers-and-events.md) instead)
 - ❌ One-time tasks (use workflows directly)
 - ❌ Real-time processing (use API routes + workflows)
 
 **Scheduled Jobs vs Subscribers:**
+
 - **Scheduled Job**: Finds carts updated >24h ago and sends emails (polling pattern)
 - **Subscriber**: Reacts to `order.created` and sends an email (event-driven)
 
@@ -37,30 +40,30 @@ Create a TypeScript file in the `src/jobs/` directory:
 
 ```typescript
 // src/jobs/sync-products.ts
-import { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { MedusaContainer } from "@medusajs/framework/types";
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
 
 export default async function syncProductsJob(container: MedusaContainer) {
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
 
-  logger.info("Starting product sync...")
+  logger.info("Starting product sync...");
 
   // Resolve services from container
-  const productService = container.resolve(Modules.PRODUCT)
-  const myService = container.resolve("my-custom-service")
+  const productService = container.resolve(Modules.PRODUCT);
+  const myService = container.resolve("my-custom-service");
 
   try {
     // Your job logic here
-    const products = await productService.listProducts({ active: true })
+    const products = await productService.listProducts({ active: true });
 
     for (const product of products) {
       // Process each product
-      await myService.syncToExternalSystem(product)
+      await myService.syncToExternalSystem(product);
     }
 
-    logger.info("Product sync completed successfully")
+    logger.info("Product sync completed successfully");
   } catch (error) {
-    logger.error(`Product sync failed: ${error.message}`)
+    logger.error(`Product sync failed: ${error.message}`);
     // Don't throw - let the job complete and retry on next schedule
   }
 }
@@ -68,7 +71,7 @@ export default async function syncProductsJob(container: MedusaContainer) {
 export const config = {
   name: "sync-products-daily", // Unique name for the job
   schedule: "0 0 * * *", // Cron expression: midnight daily
-}
+};
 ```
 
 ## Configuration Options
@@ -78,7 +81,7 @@ export const config = {
   name: "my-job", // Required: unique identifier
   schedule: "* * * * *", // Required: cron expression
   numberOfExecutions: 3, // Optional: limit total scheduled executions
-}
+};
 ```
 
 ### Configuration Properties
@@ -97,24 +100,25 @@ export const config = {
   name: "test-job",
   schedule: "0 0 * * *", // Daily at midnight
   numberOfExecutions: 1, // Will run ONCE at the next midnight, not now!
-}
+};
 
 // ✅ CORRECT: To test a job immediately, use a frequent schedule
 export const config = {
   name: "test-job",
   schedule: "* * * * *", // Every minute
   numberOfExecutions: 1, // Will run once at the next minute
-}
+};
 
 // ✅ CORRECT: Testing with multiple runs
 export const config = {
   name: "test-job",
   schedule: "*/5 * * * *", // Every 5 minutes
   numberOfExecutions: 3, // Will run 3 times (at 0, 5, 10 minutes), then stop
-}
+};
 ```
 
 **Key points:**
+
 - The job waits for the first scheduled time before executing
 - `numberOfExecutions: 1` with a daily schedule means it runs once the next day
 - To test immediately, use a frequent schedule like `"* * * * *"` (every minute)
@@ -126,15 +130,15 @@ export const config = {
 
 ```typescript
 // src/jobs/send-weekly-newsletter.ts
-import { MedusaContainer } from "@medusajs/framework/types"
-import { sendNewsletterWorkflow } from "../workflows/send-newsletter"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { MedusaContainer } from "@medusajs/framework/types";
+import { sendNewsletterWorkflow } from "../workflows/send-newsletter";
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
 export default async function sendNewsletterJob(container: MedusaContainer) {
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
-  const query = container.resolve(ContainerRegistrationKeys.QUERY)
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
+  const query = container.resolve(ContainerRegistrationKeys.QUERY);
 
-  logger.info("Sending weekly newsletter...")
+  logger.info("Sending weekly newsletter...");
 
   try {
     // Query for data
@@ -144,27 +148,27 @@ export default async function sendNewsletterJob(container: MedusaContainer) {
       filters: {
         newsletter_subscribed: true,
       },
-    })
+    });
 
-    logger.info(`Found ${customers.length} subscribers`)
+    logger.info(`Found ${customers.length} subscribers`);
 
     // Execute workflow
     await sendNewsletterWorkflow(container).run({
       input: {
         customer_ids: customers.map((c) => c.id),
       },
-    })
+    });
 
-    logger.info("Newsletter sent successfully")
+    logger.info("Newsletter sent successfully");
   } catch (error) {
-    logger.error(`Newsletter job failed: ${error.message}`)
+    logger.error(`Newsletter job failed: ${error.message}`);
   }
 }
 
 export const config = {
   name: "send-weekly-newsletter",
   schedule: "0 0 * * 0", // Every Sunday at midnight
-}
+};
 ```
 
 ## Cron Expression Examples
@@ -173,34 +177,34 @@ Cron format: `minute hour day-of-month month day-of-week`
 
 ```typescript
 // Every minute
-schedule: "* * * * *"
+schedule: "* * * * *";
 
 // Every 5 minutes
-schedule: "*/5 * * * *"
+schedule: "*/5 * * * *";
 
 // Every hour at minute 0
-schedule: "0 * * * *"
+schedule: "0 * * * *";
 
 // Every day at midnight (00:00)
-schedule: "0 0 * * *"
+schedule: "0 0 * * *";
 
 // Every day at 2:30 AM
-schedule: "30 2 * * *"
+schedule: "30 2 * * *";
 
 // Every Sunday at midnight
-schedule: "0 0 * * 0"
+schedule: "0 0 * * 0";
 
 // Every Monday at 9 AM
-schedule: "0 9 * * 1"
+schedule: "0 9 * * 1";
 
 // First day of every month at midnight
-schedule: "0 0 1 * *"
+schedule: "0 0 1 * *";
 
 // Every weekday (Mon-Fri) at 6 PM
-schedule: "0 18 * * 1-5"
+schedule: "0 18 * * 1-5";
 
 // Every 6 hours
-schedule: "0 */6 * * *"
+schedule: "0 */6 * * *";
 ```
 
 **Tip**: Use [crontab.guru](https://crontab.guru) to build and validate cron expressions.
@@ -210,18 +214,18 @@ schedule: "0 */6 * * *"
 ### 1. Always Use Logging
 
 ```typescript
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
 export default async function myJob(container: MedusaContainer) {
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
 
-  logger.info("Job started")
+  logger.info("Job started");
 
   try {
     // Job logic
-    logger.info("Job completed successfully")
+    logger.info("Job completed successfully");
   } catch (error) {
-    logger.error(`Job failed: ${error.message}`, { error })
+    logger.error(`Job failed: ${error.message}`, { error });
   }
 }
 ```
@@ -233,21 +237,21 @@ Don't throw errors at the top level - log them and let the job complete:
 ```typescript
 // ❌ BAD: Throws and stops execution
 export default async function myJob(container: MedusaContainer) {
-  const service = container.resolve("my-service")
-  const items = await service.getItems() // Might throw
+  const service = container.resolve("my-service");
+  const items = await service.getItems(); // Might throw
   // Job stops if this throws
 }
 
 // ✅ GOOD: Catches errors and logs
 export default async function myJob(container: MedusaContainer) {
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
 
   try {
-    const service = container.resolve("my-service")
-    const items = await service.getItems()
+    const service = container.resolve("my-service");
+    const items = await service.getItems();
     // Process items
   } catch (error) {
-    logger.error(`Job failed: ${error.message}`)
+    logger.error(`Job failed: ${error.message}`);
     // Job completes, will retry on next schedule
   }
 }
@@ -260,11 +264,11 @@ Design jobs to be safely re-runnable:
 ```typescript
 // ✅ GOOD: Idempotent job
 export default async function syncProducts(container: MedusaContainer) {
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
-  const myService = container.resolve("my-service")
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
+  const myService = container.resolve("my-service");
 
   // Check what's already synced
-  const lastSyncTime = await myService.getLastSyncTime()
+  const lastSyncTime = await myService.getLastSyncTime();
 
   // Only sync products updated since last sync
   const { data: products } = await query.graph({
@@ -272,15 +276,15 @@ export default async function syncProducts(container: MedusaContainer) {
     filters: {
       updated_at: { $gte: lastSyncTime },
     },
-  })
+  });
 
   // Sync products (upsert, don't insert)
   for (const product of products) {
-    await myService.upsertToExternalSystem(product)
+    await myService.upsertToExternalSystem(product);
   }
 
   // Update last sync time
-  await myService.setLastSyncTime(new Date())
+  await myService.setLastSyncTime(new Date());
 }
 ```
 
@@ -288,12 +292,12 @@ export default async function syncProducts(container: MedusaContainer) {
 
 ```typescript
 // ✅ GOOD: Uses workflow for mutations
-import { deleteCartsWorkflow } from "../workflows/delete-carts"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { deleteCartsWorkflow } from "../workflows/delete-carts";
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
 export default async function cleanupExpiredCarts(container: MedusaContainer) {
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
-  const query = container.resolve(ContainerRegistrationKeys.QUERY)
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
+  const query = container.resolve(ContainerRegistrationKeys.QUERY);
 
   // Find expired carts
   const { data: carts } = await query.graph({
@@ -304,38 +308,38 @@ export default async function cleanupExpiredCarts(container: MedusaContainer) {
         $lte: new Date(Date.now() - 24 * 60 * 60 * 1000), // 24 hours ago
       },
     },
-  })
+  });
 
-  logger.info(`Found ${carts.length} expired carts`)
+  logger.info(`Found ${carts.length} expired carts`);
 
   // Use workflow for deletion (import at top of file)
   await deleteCartsWorkflow(container).run({
     input: {
       cart_ids: carts.map((c) => c.id),
     },
-  })
+  });
 
-  logger.info("Expired carts cleaned up")
+  logger.info("Expired carts cleaned up");
 }
 ```
 
 ### 5. Add Metrics/Monitoring
 
 ```typescript
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
 export default async function myJob(container: MedusaContainer) {
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
-  const startTime = Date.now()
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
+  const startTime = Date.now();
 
   try {
     // Job logic
-    const processed = 100 // Track what you processed
+    const processed = 100; // Track what you processed
 
-    const duration = Date.now() - startTime
-    logger.info(`Job completed: ${processed} items in ${duration}ms`)
+    const duration = Date.now() - startTime;
+    logger.info(`Job completed: ${processed} items in ${duration}ms`);
   } catch (error) {
-    logger.error(`Job failed after ${Date.now() - startTime}ms`)
+    logger.error(`Job failed after ${Date.now() - startTime}ms`);
   }
 }
 ```
@@ -350,14 +354,14 @@ export const config = {
   name: "test-job",
   schedule: "* * * * *", // Every minute
   numberOfExecutions: 3, // Run 3 times (next 3 minutes), then stop
-}
+};
 
 // ❌ WRONG: This won't help with testing
 export const config = {
   name: "test-job",
   schedule: "0 0 * * *", // Daily at midnight
   numberOfExecutions: 1, // Will only run ONCE at next midnight, not useful for testing
-}
+};
 ```
 
 **Remember**: `numberOfExecutions` doesn't make the job run immediately - it limits how many times it runs on its schedule.
@@ -366,21 +370,19 @@ export const config = {
 
 ```typescript
 // src/jobs/send-abandoned-cart-emails.ts
-import { MedusaContainer } from "@medusajs/framework/types"
-import { sendAbandonedCartEmailWorkflow } from "../workflows/send-abandoned-cart-email"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { MedusaContainer } from "@medusajs/framework/types";
+import { sendAbandonedCartEmailWorkflow } from "../workflows/send-abandoned-cart-email";
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
-export default async function abandonedCartEmailJob(
-  container: MedusaContainer
-) {
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
-  const query = container.resolve(ContainerRegistrationKeys.QUERY)
+export default async function abandonedCartEmailJob(container: MedusaContainer) {
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
+  const query = container.resolve(ContainerRegistrationKeys.QUERY);
 
-  logger.info("Starting abandoned cart email job...")
+  logger.info("Starting abandoned cart email job...");
 
   try {
     // Find carts updated more than 24 hours ago that haven't completed
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
     const { data: carts } = await query.graph({
       entity: "cart",
@@ -392,9 +394,9 @@ export default async function abandonedCartEmailJob(
         completed_at: null,
         email: { $ne: null }, // Must have email
       },
-    })
+    });
 
-    logger.info(`Found ${carts.length} abandoned carts`)
+    logger.info(`Found ${carts.length} abandoned carts`);
 
     // Process in batches
     for (const cart of carts) {
@@ -404,22 +406,22 @@ export default async function abandonedCartEmailJob(
             cart_id: cart.id,
             email: cart.email,
           },
-        })
-        logger.info(`Sent email for cart ${cart.id}`)
+        });
+        logger.info(`Sent email for cart ${cart.id}`);
       } catch (error) {
-        logger.error(`Failed to send email for cart ${cart.id}: ${error.message}`)
+        logger.error(`Failed to send email for cart ${cart.id}: ${error.message}`);
         // Continue with other carts
       }
     }
 
-    logger.info("Abandoned cart email job completed")
+    logger.info("Abandoned cart email job completed");
   } catch (error) {
-    logger.error(`Abandoned cart job failed: ${error.message}`)
+    logger.error(`Abandoned cart job failed: ${error.message}`);
   }
 }
 
 export const config = {
   name: "send-abandoned-cart-emails",
   schedule: "0 */6 * * *", // Every 6 hours
-}
+};
 ```

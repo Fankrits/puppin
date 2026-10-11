@@ -20,48 +20,49 @@ Create these tasks in your todo list:
 ## Basic Workflow Structure
 
 **File Organization:**
+
 - **Recommended**: Create workflow steps in `src/workflows/steps/[step-name].ts`
 - Workflow composition functions go in `src/workflows/[workflow-name].ts`
 - This keeps steps reusable and organized
 
 ```typescript
 // src/workflows/steps/create-my-model.ts
-import { createStep, StepResponse } from "@medusajs/framework/workflows-sdk"
+import { createStep, StepResponse } from "@medusajs/framework/workflows-sdk";
 
 type Input = {
-  my_key: string
-}
+  my_key: string;
+};
 
 // Note: a step should only do one mutation this ensures rollback mechanisms work
 // For workflows that retry build your steps to be idempotent
 export const createMyModelStep = createStep(
   "create-my-model",
   async (input: Input, { container }) => {
-    const myModule = container.resolve("my")
+    const myModule = container.resolve("my");
 
     const [newMy] = await myModule.createMyModels({
       ...input,
-    })
+    });
 
     return new StepResponse(
       newMy,
-      newMy.id // explicit compensation input - otherwise defaults to step's output
-    )
+      newMy.id, // explicit compensation input - otherwise defaults to step's output
+    );
   },
   // Optional compensation function
   async (id, { container }) => {
-    const myModule = container.resolve("my")
-    await myModule.deleteMyModels(id)
-  }
-)
+    const myModule = container.resolve("my");
+    await myModule.deleteMyModels(id);
+  },
+);
 
 // src/workflows/create-my-model.ts
-import { createWorkflow, WorkflowResponse } from "@medusajs/framework/workflows-sdk"
-import { createMyModelStep } from "./steps/create-my-model"
+import { createWorkflow, WorkflowResponse } from "@medusajs/framework/workflows-sdk";
+import { createMyModelStep } from "./steps/create-my-model";
 
 type Input = {
-  my_key: string
-}
+  my_key: string;
+};
 
 const createMyModel = createWorkflow(
   "create-my-model",
@@ -69,15 +70,15 @@ const createMyModel = createWorkflow(
   // The workflow function must be a regular synchronous function (not async/arrow)
   // No direct variable manipulation, conditionals, or date creation - use transform/when instead
   function (input: Input) {
-    const newMy = createMyModelStep(input)
+    const newMy = createMyModelStep(input);
 
     return new WorkflowResponse({
       newMy,
-    })
-  }
-)
+    });
+  },
+);
 
-export default createMyModel
+export default createMyModel;
 ```
 
 ## Workflow Composition Rules
@@ -85,6 +86,7 @@ export default createMyModel
 The workflow composition function runs at application load time and has important limitations:
 
 ### Function Declaration
+
 - ✅ Use regular synchronous functions
 - ❌ No `async` functions
 - ❌ No arrow functions (use `function` keyword)
@@ -95,56 +97,54 @@ The workflow composition function runs at application load time and has importan
 
 ```typescript
 // ✅ CORRECT - Rename each step invocation with .config()
-export const processCustomersWorkflow = createWorkflow(
-  "process-customers",
-  function (input) {
-    const customers = transform({ ids: input.customer_ids }, (input) => input.ids)
+export const processCustomersWorkflow = createWorkflow("process-customers", function (input) {
+  const customers = transform({ ids: input.customer_ids }, (input) => input.ids);
 
-    // First invocation - no need to rename
-    const customer1 = fetchCustomerStep(customers[0])
+  // First invocation - no need to rename
+  const customer1 = fetchCustomerStep(customers[0]);
 
-    // Second invocation - different name
-    const customer2 = fetchCustomerStep(customers[1]).config({
-      name: "fetch-customer-2"
-    })
+  // Second invocation - different name
+  const customer2 = fetchCustomerStep(customers[1]).config({
+    name: "fetch-customer-2",
+  });
 
-    const result = transform({ customer1, customer2 }, (data) => ({
-      customers: [data.customer1, data.customer2]
-    }))
+  const result = transform({ customer1, customer2 }, (data) => ({
+    customers: [data.customer1, data.customer2],
+  }));
 
-    return new WorkflowResponse(result)
-  }
-)
+  return new WorkflowResponse(result);
+});
 
 // ❌ WRONG - Calling the same step multiple times without renaming
-export const processCustomersWorkflow = createWorkflow(
-  "process-customers",
-  function (input) {
-    const customers = transform({ ids: input.customer_ids }, (input) => input.ids)
+export const processCustomersWorkflow = createWorkflow("process-customers", function (input) {
+  const customers = transform({ ids: input.customer_ids }, (input) => input.ids);
 
-    // This will cause runtime errors - duplicate step names
-    const customer1 = fetchCustomerStep(customers[0])
-    const customer2 = fetchCustomerStep(customers[1]) // ❌ Conflict!
+  // This will cause runtime errors - duplicate step names
+  const customer1 = fetchCustomerStep(customers[0]);
+  const customer2 = fetchCustomerStep(customers[1]); // ❌ Conflict!
 
-    return new WorkflowResponse({ customers: [customer1, customer2] })
-  }
-)
+  return new WorkflowResponse({ customers: [customer1, customer2] });
+});
 ```
 
 **Why this matters:**
+
 - Medusa uses step names to track execution state
 - Duplicate names cause conflicts in the workflow execution engine
 - Each step invocation needs a unique identifier
 - The workflow will fail at runtime if steps aren't renamed
 
 ### Variable Operations
+
 - ❌ No direct variable manipulation or concatenation → Use `transform({ in }, ({ in }) => \`Transformed: ${in}\`)` instead
 - Variables lack values until execution time - all operations must use `transform()`
 
 ### Date/Time Operations
+
 - ❌ No `new Date()` (will be fixed to load time) → Wrap in `transform()` for execution-time evaluation
 
 ### Conditional Logic
+
 - ❌ No `if`/`else` statements → Use `when(input, (input) => input.is_active).then(() => { /* steps */ })` instead
 - ❌ No ternary operators (`? :`) → Use `transform()` instead
 - ❌ No nullish coalescing (`??`) → Use `transform()` instead
@@ -153,40 +153,35 @@ export const processCustomersWorkflow = createWorkflow(
 - ❌ No double negation (`!!`) → Use `transform()` instead
 
 ### Object Operations
+
 - ❌ No object spreading (`...`) for destructuring or spreading properties → Use `transform()` to create new objects with desired properties
 
 ```typescript
 // ❌ WRONG - Object spreading in workflow
-const myWorkflow = createWorkflow(
-  "process-data",
-  function (input: WorkflowInput) {
-    const updatedData = {
-      ...input.data,
-      newField: "value"
-    } // Won't work - spread operator not allowed
+const myWorkflow = createWorkflow("process-data", function (input: WorkflowInput) {
+  const updatedData = {
+    ...input.data,
+    newField: "value",
+  }; // Won't work - spread operator not allowed
 
-    step1(updatedData)
-})
+  step1(updatedData);
+});
 
 // ✅ CORRECT - Use transform to create new objects
-import { transform } from "@medusajs/framework/workflows-sdk"
+import { transform } from "@medusajs/framework/workflows-sdk";
 
-const myWorkflow = createWorkflow(
-  "process-data",
-  function (input: WorkflowInput) {
-    const updatedData = transform(
-      { input },
-      (data) => ({
-        ...data.input.data,
-        newField: "value"
-      })
-    )
+const myWorkflow = createWorkflow("process-data", function (input: WorkflowInput) {
+  const updatedData = transform({ input }, (data) => ({
+    ...data.input.data,
+    newField: "value",
+  }));
 
-    step1(updatedData)
-})
+  step1(updatedData);
+});
 ```
 
 ### Loops
+
 - ❌ No `for`/`while` loops → Use alternatives below based on your use case
 
 Workflow composition functions run at application load time to define the workflow structure, not to execute logic. Loops cannot be used directly in the composition function. Instead, use these patterns:
@@ -197,43 +192,32 @@ When you need to execute a workflow multiple times (e.g., once per item in an ar
 
 ```typescript
 // ❌ WRONG - Loop inside workflow composition
-const myWorkflow = createWorkflow(
-  "hello-world",
-  function (input: WorkflowInput) {
-    for (const item of input.items) {
-      step1(item) // Won't work - loop runs at load time, not execution time
-    }
-})
+const myWorkflow = createWorkflow("hello-world", function (input: WorkflowInput) {
+  for (const item of input.items) {
+    step1(item); // Won't work - loop runs at load time, not execution time
+  }
+});
 
 // ✅ CORRECT - Loop in calling code
 // API route that calls the workflow
-import {
-  MedusaRequest,
-  MedusaResponse,
-} from "@medusajs/framework/http"
-import myWorkflow from "../../workflows/my-workflow"
+import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
+import myWorkflow from "../../workflows/my-workflow";
 
-export async function POST(
-  req: MedusaRequest,
-  res: MedusaResponse
-) {
-  const { items } = req.body
+export async function POST(req: MedusaRequest, res: MedusaResponse) {
+  const { items } = req.body;
 
   // Execute the workflow once for each item
   for (const item of items) {
-    await myWorkflow(req.scope)
-      .run({ item })
+    await myWorkflow(req.scope).run({ item });
   }
 
-  res.status(200).send({ success: true })
+  res.status(200).send({ success: true });
 }
 
 // Workflow definition - processes a single item
-const myWorkflow = createWorkflow(
-  "hello-world",
-  function (input: WorkflowInput) {
-    step1(input.item)
-})
+const myWorkflow = createWorkflow("hello-world", function (input: WorkflowInput) {
+  step1(input.item);
+});
 ```
 
 **Alternative 2: Use `transform` for Array Operations (Prepare step inputs)**
@@ -242,46 +226,45 @@ When you need to iterate over an array to prepare inputs for a step, use `transf
 
 ```typescript
 // ❌ WRONG - Loop to build array
-const myWorkflow = createWorkflow(
-  "hello-world",
-  function (input: WorkflowInput) {
-    const stepInputs = []
-    for (const item of input.items) {
-      stepInputs.push({ id: item.id }) // Won't work - loop runs at load time
-    }
-    step1(stepInputs)
-})
+const myWorkflow = createWorkflow("hello-world", function (input: WorkflowInput) {
+  const stepInputs = [];
+  for (const item of input.items) {
+    stepInputs.push({ id: item.id }); // Won't work - loop runs at load time
+  }
+  step1(stepInputs);
+});
 
 // ✅ CORRECT - Use transform to map array
-import { transform } from "@medusajs/framework/workflows-sdk"
+import { transform } from "@medusajs/framework/workflows-sdk";
 
-const myWorkflow = createWorkflow(
-  "hello-world",
-  function (input: WorkflowInput) {
-    const stepInputs = transform(
-      {
-        input,
-      },
-      (data) => {
-        // This function runs at execution time
-        return data.input.items.map((item) => ({ id: item.id }))
-      }
-    )
+const myWorkflow = createWorkflow("hello-world", function (input: WorkflowInput) {
+  const stepInputs = transform(
+    {
+      input,
+    },
+    (data) => {
+      // This function runs at execution time
+      return data.input.items.map((item) => ({ id: item.id }));
+    },
+  );
 
-    step1(stepInputs)
-})
+  step1(stepInputs);
+});
 ```
 
 **Why this matters:**
+
 - The workflow composition function runs once at application load time to define the structure
 - Loops would execute at load time with no data, not at execution time with actual input
 - Alternative 1 repeats the entire workflow (including rollback capability) for each item
 - Alternative 2 processes arrays within a single workflow execution using `transform()`
 
 ### Error Handling
+
 - ❌ No `try-catch` blocks → See error handling patterns in Medusa documentation
 
 ### Return Values
+
 - ✅ Only return serializable values (primitives, plain objects)
 - ❌ No non-serializable types (Maps, Sets, etc.)
 - For buffers: Return as object property, then recreate with `Buffer.from()` when processing results
@@ -305,9 +288,9 @@ const myWorkflow = createWorkflow(
 
 ```typescript
 // Link definition in src/links/review-product.ts
-import { defineLink } from "@medusajs/framework/utils"
-import ReviewModule from "../modules/review"
-import ProductModule from "@medusajs/medusa/product"
+import { defineLink } from "@medusajs/framework/utils";
+import ReviewModule from "../modules/review";
+import ProductModule from "@medusajs/medusa/product";
 
 // Order: review FIRST, then product
 export default defineLink(
@@ -315,47 +298,48 @@ export default defineLink(
     linkable: ReviewModule.linkable.review,
     isList: true,
   },
-  ProductModule.linkable.product
-)
+  ProductModule.linkable.product,
+);
 ```
 
 ```typescript
 // ✅ CORRECT - Order matches defineLink (review first, then product)
-import { createRemoteLinkStep } from "@medusajs/medusa/core-flows"
-import { createWorkflow, transform, WorkflowResponse } from "@medusajs/framework/workflows-sdk"
-import { Modules } from "@medusajs/framework/utils"
-import { REVIEW_MODULE } from "../modules/review"
+import { createRemoteLinkStep } from "@medusajs/medusa/core-flows";
+import { createWorkflow, transform, WorkflowResponse } from "@medusajs/framework/workflows-sdk";
+import { Modules } from "@medusajs/framework/utils";
+import { REVIEW_MODULE } from "../modules/review";
 
-export const createReviewWorkflow = createWorkflow(
-  "create-review",
-  function (input) {
-    const review = createReviewStep(input)
+export const createReviewWorkflow = createWorkflow("create-review", function (input) {
+  const review = createReviewStep(input);
 
-    // Order MUST match defineLink: review first, then product
-    const linkData = transform({ review, input }, ({ review, input }) => [{
+  // Order MUST match defineLink: review first, then product
+  const linkData = transform({ review, input }, ({ review, input }) => [
+    {
       [REVIEW_MODULE]: {
         review_id: review.id,
       },
       [Modules.PRODUCT]: {
         product_id: input.product_id,
       },
-    }])
+    },
+  ]);
 
-    createRemoteLinkStep(linkData)
+  createRemoteLinkStep(linkData);
 
-    return new WorkflowResponse({ review })
-  }
-)
+  return new WorkflowResponse({ review });
+});
 
 // ❌ WRONG - Order doesn't match defineLink (product first, then review)
-const linkData = transform({ review, input }, ({ review, input }) => [{
-  [Modules.PRODUCT]: {
-    product_id: input.product_id,
+const linkData = transform({ review, input }, ({ review, input }) => [
+  {
+    [Modules.PRODUCT]: {
+      product_id: input.product_id,
+    },
+    [REVIEW_MODULE]: {
+      review_id: review.id,
+    },
   },
-  [REVIEW_MODULE]: {
-    review_id: review.id,
-  },
-}]) // Runtime error: link direction mismatch!
+]); // Runtime error: link direction mismatch!
 ```
 
 ```typescript
@@ -363,78 +347,72 @@ const linkData = transform({ review, input }, ({ review, input }) => [{
 const createReviewLinkStep = createStep(
   "create-review-link",
   async ({ reviewId, productId }, { container }) => {
-    const link = container.resolve("link")
+    const link = container.resolve("link");
     await link.create({
       product: { product_id: productId },
       review: { review_id: reviewId },
-    })
+    });
     // This duplicates functionality that createRemoteLinkStep provides
-  }
-)
+  },
+);
 ```
 
 **Removing Links:**
 
 ```typescript
 // ✅ CORRECT - Use Medusa's built-in dismissRemoteLinkStep
-import { dismissRemoteLinkStep } from "@medusajs/medusa/core-flows"
+import { dismissRemoteLinkStep } from "@medusajs/medusa/core-flows";
 
-export const deleteReviewWorkflow = createWorkflow(
-  "delete-review",
-  function (input) {
-    const linkData = transform({ input }, ({ input }) => [{
+export const deleteReviewWorkflow = createWorkflow("delete-review", function (input) {
+  const linkData = transform({ input }, ({ input }) => [
+    {
       [Modules.PRODUCT]: { product_id: input.product_id },
       review: { review_id: input.review_id },
-    }])
+    },
+  ]);
 
-    dismissRemoteLinkStep(linkData)
-    deleteReviewStep(input)
+  dismissRemoteLinkStep(linkData);
+  deleteReviewStep(input);
 
-    return new WorkflowResponse({ success: true })
-  }
-)
+  return new WorkflowResponse({ success: true });
+});
 ```
 
 **Querying Data in Workflows:**
 
 ```typescript
 // ✅ CORRECT - Use Medusa's built-in useQueryGraphStep
-import { useQueryGraphStep } from "@medusajs/medusa/core-flows"
-import { createWorkflow, WorkflowResponse } from "@medusajs/framework/workflows-sdk"
+import { useQueryGraphStep } from "@medusajs/medusa/core-flows";
+import { createWorkflow, WorkflowResponse } from "@medusajs/framework/workflows-sdk";
 
-export const getProductReviewsWorkflow = createWorkflow(
-  "get-product-reviews",
-  function (input) {
-    // Query product with reviews using built-in step
-    const { data: products } = useQueryGraphStep({
-      entity: "product",
-      fields: ["id", "title", "reviews.*"],
-      filters: {
-        id: input.product_id,
-      },
-    })
+export const getProductReviewsWorkflow = createWorkflow("get-product-reviews", function (input) {
+  // Query product with reviews using built-in step
+  const { data: products } = useQueryGraphStep({
+    entity: "product",
+    fields: ["id", "title", "reviews.*"],
+    filters: {
+      id: input.product_id,
+    },
+  });
 
-    return new WorkflowResponse({ product: products[0] })
-  }
-)
+  return new WorkflowResponse({ product: products[0] });
+});
 
 // ❌ WRONG - Don't create custom query steps
-const queryProductStep = createStep(
-  "query-product",
-  async ({ productId }, { container }) => {
-    const query = container.resolve("query")
-    const { data } = await query.graph({
-      entity: "product",
-      fields: ["id", "title", "reviews.*"],
-      filters: { id: productId },
-    })
-    return new StepResponse(data[0])
-  }
-)
+const queryProductStep = createStep("query-product", async ({ productId }, { container }) => {
+  const query = container.resolve("query");
+  const { data } = await query.graph({
+    entity: "product",
+    fields: ["id", "title", "reviews.*"],
+    filters: { id: productId },
+  });
+  return new StepResponse(data[0]);
+});
 // This duplicates functionality that useQueryGraphStep provides
 ```
 
 **Why reuse built-in steps:**
+
 - Already tested and optimized by Medusa
 - Handles edge cases and error scenarios
 - Maintains consistency with Medusa's internal workflows
@@ -442,6 +420,7 @@ const queryProductStep = createStep(
 - Less code to maintain
 
 **Other common built-in steps to look for:**
+
 - Event emission steps
 - Notification steps
 - Inventory management steps
@@ -460,26 +439,23 @@ Check Medusa documentation or `@medusajs/medusa/core-flows` for available built-
 export const deleteReviewStep = createStep(
   "delete-review",
   async ({ reviewId, customerId }: Input, { container }) => {
-    const reviewModule = container.resolve("review")
+    const reviewModule = container.resolve("review");
 
     // Validation happens inside the step
-    const review = await reviewModule.retrieveReview(reviewId)
+    const review = await reviewModule.retrieveReview(reviewId);
 
     if (review.customer_id !== customerId) {
-      throw new MedusaError(
-        MedusaError.Types.NOT_ALLOWED,
-        "You can only delete your own reviews"
-      )
+      throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "You can only delete your own reviews");
     }
 
-    await reviewModule.deleteReviews(reviewId)
+    await reviewModule.deleteReviews(reviewId);
 
-    return new StepResponse({ id: reviewId }, reviewId)
+    return new StepResponse({ id: reviewId }, reviewId);
   },
   async (reviewId, { container }) => {
     // Compensation: restore the review if needed
-  }
-)
+  },
+);
 ```
 
 ### ❌ WRONG - Validation in API Route
@@ -487,25 +463,26 @@ export const deleteReviewStep = createStep(
 ```typescript
 // src/api/store/reviews/[id]/route.ts
 export async function DELETE(req: MedusaRequest, res: MedusaResponse) {
-  const { id } = req.params
-  const customerId = req.auth_context.actor_id
+  const { id } = req.params;
+  const customerId = req.auth_context.actor_id;
 
   // ❌ WRONG: Don't validate business rules in the route
-  const reviewModule = req.scope.resolve("review")
-  const review = await reviewModule.retrieveReview(id)
+  const reviewModule = req.scope.resolve("review");
+  const review = await reviewModule.retrieveReview(id);
 
   if (review.customer_id !== customerId) {
-    throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "Not your review")
+    throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "Not your review");
   }
 
   // ❌ WRONG: Don't call workflows after manual validation
   const { result } = await deleteReviewWorkflow(req.scope).run({
-    input: { reviewId: id }
-  })
+    input: { reviewId: id },
+  });
 }
 ```
 
 **Why this matters:**
+
 - Workflows are the single source of truth for business logic
 - Validation in routes bypasses workflow rollback mechanisms
 - Makes testing harder and logic harder to reuse

@@ -27,6 +27,7 @@ Best practices for connecting storefront to ecommerce backend APIs. Framework-ag
 ### Detection Strategy
 
 **1. Check for monorepo structure:**
+
 ```bash
 # Look for backend directory
 ls -la ../backend
@@ -35,27 +36,31 @@ ls -la ../../apps/backend
 ```
 
 Common monorepo patterns:
+
 - `/apps/storefront` + `/apps/backend`
 - `/frontend` + `/backend`
 - `/packages/web` + `/packages/api`
 
 **2. Check package.json dependencies:**
+
 ```json
 {
   "dependencies": {
-    "@medusajs/js-sdk": "...",  // Medusa
+    "@medusajs/js-sdk": "..." // Medusa
     // check other ecommerce frameworks...
   }
 }
 ```
 
 **3. Check environment variables:**
+
 ```bash
 # Look in .env, .env.local, .env.example
 grep -i "api\|backend\|medusa\|shopify\|commerce" .env*
 ```
 
 Common patterns:
+
 - `NEXT_PUBLIC_MEDUSA_BACKEND_URL` → Medusa
 - Custom `API_URL` or `BACKEND_URL` → Other backend
 
@@ -65,6 +70,7 @@ Common patterns:
 I need to connect to the ecommerce backend. Which backend are you using?
 
 Options:
+
 - Medusa (open-source headless commerce)
 - Custom backend
 - Other
@@ -81,12 +87,14 @@ Options:
 - Rate limits and best practices
 
 **For Medusa:**
+
 - Documentation: https://docs.medusajs.com
 - MCP Server: If available, use Docs MCP server for real-time API information
 - JS SDK docs: https://docs.medusajs.com/resources/js-sdk
 - See `reference/medusa.md` for detailed integration guide
 
 **For other backends:**
+
 - Check the backend's documentation portal
 - Look for MCP server if available
 - Verify API endpoints and authentication methods
@@ -99,18 +107,22 @@ Options:
 Identify the frontend framework to determine appropriate data fetching patterns:
 
 **Next.js:**
+
 - App Router: Server Components (async/await), Client Components (useEffect/TanStack Query)
 - Pages Router: getServerSideProps/getStaticProps (server), useEffect (client)
 
 **SvelteKit:**
+
 - Load functions for server-side data
 - Client-side: fetch in component lifecycle
 
 **TanStack Start:**
+
 - Server functions for server-side data
 - Client-side: fetch with React hooks
 
 **General Rule:**
+
 - **Server-side for initial load**: SEO, performance, security (product pages, listings)
 - **Client-side for interactions**: Cart, filters, search, user-specific data
 
@@ -125,11 +137,13 @@ NEXT_PUBLIC_PUBLISHABLE_KEY=pk_...
 ```
 
 **Framework-specific prefixes:**
+
 - Next.js: `NEXT_PUBLIC_` for client-side
 - SvelteKit: `PUBLIC_` for client-side
 - Vite-based (TanStack Start): `VITE_` for client-side
 
 **Security:**
+
 - ❌ NEVER expose secret/admin keys in client-side code
 - ✅ Publishable keys are safe for client (Medusa, Stripe)
 - ✅ Secret keys only in server-side code or environment
@@ -139,6 +153,7 @@ NEXT_PUBLIC_PUBLISHABLE_KEY=pk_...
 ### Medusa Backend
 
 **For complete Medusa integration guide**, see `reference/medusa.md` which covers:
+
 - SDK installation and setup
 - Vite configuration (for TanStack Start, etc.)
 - TypeScript types from `@medusajs/types`
@@ -153,25 +168,28 @@ NEXT_PUBLIC_PUBLISHABLE_KEY=pk_...
 For non-Medusa backends (custom APIs, third-party platforms):
 
 **1. Consult backend's API documentation** for:
-   - Authentication requirements
-   - Available endpoints
-   - Request/response formats
-   - SDK availability (check if official SDK exists)
+
+- Authentication requirements
+- Available endpoints
+- Request/response formats
+- SDK availability (check if official SDK exists)
 
 **2. Use backend's official SDK if available** - provides type safety, error handling, and best practices
 
 **3. If no SDK, create API client wrapper:**
-   - Centralize API calls in one module
-   - Group by resource (products, cart, customers, orders)
-   - Handle authentication (include tokens/cookies)
-   - Handle errors consistently
-   - Use native fetch or axios
+
+- Centralize API calls in one module
+- Group by resource (products, cart, customers, orders)
+- Handle authentication (include tokens/cookies)
+- Handle errors consistently
+- Use native fetch or axios
 
 ## Authentication Patterns
 
 ### Customer Authentication
 
 **Session-based (cookies):**
+
 - Backend manages session via cookies
 - No manual token management needed
 - Works across page refreshes
@@ -179,6 +197,7 @@ For non-Medusa backends (custom APIs, third-party platforms):
 - Call backend login endpoint, check auth state, logout methods
 
 **Token-based (JWT, OAuth):**
+
 - Store token in localStorage or secure cookie after login
 - Include token in Authorization header for all authenticated requests
 - Common in headless/API-first backends
@@ -196,6 +215,7 @@ Use framework-specific auth patterns for redirects.
 ### Cart Access Pattern
 
 **Guest carts:**
+
 - Store cart ID in localStorage or cookie
 - Check for existing cart ID on app load
 - Create new cart if none exists
@@ -203,6 +223,7 @@ Use framework-specific auth patterns for redirects.
 - Persists across sessions
 
 **Logged-in carts:**
+
 - Associate cart with customer account
 - Syncs across devices
 - **CRITICAL: Merge guest cart with customer cart on login** - Transfer guest cart items to customer's account cart, then clear guest cart ID from localStorage
@@ -214,6 +235,7 @@ Use framework-specific auth patterns for redirects.
 ### Global Cart State
 
 **React Context (for simple cases):**
+
 - Create CartContext and CartProvider
 - Store cart state and cartId (from localStorage)
 - Load cart on mount if cartId exists
@@ -221,12 +243,14 @@ Use framework-specific auth patterns for redirects.
 - Update cart state after each operation
 
 **State management libraries (Zustand, Redux):**
+
 - Use for complex state requirements
 - Better for large applications
 - Easier to debug with DevTools
 - Same pattern: Store cart, provide actions, sync with backend
 
 **Key requirements:**
+
 - Cart accessible from any component
 - Real-time cart count updates
 - Optimistic UI updates (update UI immediately, sync with backend)
@@ -245,11 +269,13 @@ Use framework-specific auth patterns for redirects.
 4. **Update cart count to 0** - Navbar and UI should reflect empty cart
 
 **When to clear:**
+
 - After successful order placement (order confirmed)
 - On navigation to order confirmation page
 - Before redirecting to thank you page
 
 **Why this is critical:**
+
 - Prevents "phantom cart" from appearing in cart popup after order
 - Ensures clean state for next shopping session
 - Improves UX by not showing old cart items
@@ -259,17 +285,20 @@ Use framework-specific auth patterns for redirects.
 ### Ecommerce-Specific Errors
 
 **Out of stock:**
+
 - Catch errors when adding to cart
 - Check for "out of stock" or "inventory" in error message
 - Show user-friendly message: "Sorry, this item is now out of stock"
 - Update product availability UI to show out of stock
 
 **Price changed during checkout:**
+
 - Compare cart total with expected total
 - If different, show warning: "Prices have been updated. Please review your cart."
 - Highlight changed prices in cart
 
 **Payment failed:**
+
 - Catch errors during order completion
 - Check for specific payment errors: payment_declined, insufficient_funds, etc.
 - Show specific messages:
@@ -278,6 +307,7 @@ Use framework-specific auth patterns for redirects.
   - Generic → "Payment failed. Please try again or contact support."
 
 **Session expired:**
+
 - Catch 401/Unauthorized errors
 - Clear auth state
 - Redirect to login with message: "Your session has expired. Please log in again."
@@ -285,6 +315,7 @@ Use framework-specific auth patterns for redirects.
 ### User-Friendly Error Messages
 
 **Transform technical errors to clear messages:**
+
 - Network/fetch errors → "Unable to connect. Please check your internet connection."
 - Timeout errors → "Request timed out. Please try again."
 - Inventory errors → "This item is no longer available in the requested quantity."
@@ -301,10 +332,12 @@ Use framework-specific auth patterns for redirects.
 **Installation:** `npm install @tanstack/react-query`
 
 **Setup:**
+
 - Create QueryClient with default options (staleTime: 5 min, retry: 1)
 - Wrap app with QueryClientProvider
 
 **Query pattern (for fetching data):**
+
 - Use `useQuery` with queryKey and queryFn
 - queryKey: Array with resource and identifier `['products', categoryId]`
 - queryFn: API call function
@@ -312,6 +345,7 @@ Use framework-specific auth patterns for redirects.
 - Use for: Products, cart, customer data, categories
 
 **Mutation pattern (for modifying data):**
+
 - Use `useMutation` with mutationFn
 - mutationFn: API operation (add to cart, update, delete)
 - onSuccess: Update cache or invalidate queries
@@ -319,6 +353,7 @@ Use framework-specific auth patterns for redirects.
 - Use for: Add to cart, remove from cart, update quantities, place order
 
 **Benefits:**
+
 - Automatic caching (no manual cache management)
 - Built-in loading/error states
 - Request deduplication
@@ -326,6 +361,7 @@ Use framework-specific auth patterns for redirects.
 - Cache invalidation strategies
 
 **Ecommerce-specific usage:**
+
 - Products: Long stale time (5-10 min) - products don't change often
 - Cart: Short or no stale time - prices/inventory can change
 - Categories: Long stale time - rarely change
@@ -333,6 +369,7 @@ Use framework-specific auth patterns for redirects.
 ### Caching Strategy
 
 **Client-side caching:**
+
 - TanStack Query handles automatically with `staleTime` and `cacheTime`
 - Configure globally or per-query
 - Product data: 5-10 min stale time
@@ -340,6 +377,7 @@ Use framework-specific auth patterns for redirects.
 - Categories: Long stale time
 
 **Server-side caching (framework-specific):**
+
 - Next.js: Use `revalidate` export or cache configuration
 - Set revalidation period (e.g., 300 seconds for product pages)
 - Static generation with ISR for product pages
@@ -380,6 +418,7 @@ Check backend documentation for supported pagination type.
 - [ ] Price change detection and warnings
 
 **For Medusa backends, also check:**
+
 - [ ] Medusa SDK installed (`@medusajs/js-sdk` + `@medusajs/types`)
 - [ ] SDK initialized with baseUrl and publishableKey
 - [ ] Vite SSR config added (if using TanStack Start/Vite)

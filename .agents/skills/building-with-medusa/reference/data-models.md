@@ -5,7 +5,7 @@ Data models represent tables in the database. Use Medusa's Data Model Language (
 ## Property Types
 
 ```typescript
-import { model } from "@medusajs/framework/utils"
+import { model } from "@medusajs/framework/utils";
 
 const MyModel = model.define("my_model", {
   // Primary key (required)
@@ -33,17 +33,17 @@ const MyModel = model.define("my_model", {
 
   // Array
   tags: model.array().nullable(),
-})
+});
 ```
 
 ## Property Modifiers
 
 ```typescript
-model.text() // Required by default
-model.text().nullable() // Allow null values
-model.text().default("value") // Set default value
-model.text().unique() // Unique constraint
-model.text().primaryKey() // Set as primary key
+model.text(); // Required by default
+model.text().nullable(); // Allow null values
+model.text().default("value"); // Set default value
+model.text().unique(); // Unique constraint
+model.text().primaryKey(); // Set as primary key
 ```
 
 ## Relationships Within a Module
@@ -52,8 +52,8 @@ Define relationships between data models in the same module:
 
 ```typescript
 // src/modules/blog/models/post.ts
-import { model } from "@medusajs/framework/utils"
-import { Comment } from "./comment"
+import { model } from "@medusajs/framework/utils";
+import { Comment } from "./comment";
 
 export const Post = model.define("post", {
   id: model.id().primaryKey(),
@@ -61,11 +61,11 @@ export const Post = model.define("post", {
   comments: model.hasMany(() => Comment, {
     mappedBy: "post",
   }),
-})
+});
 
 // src/modules/blog/models/comment.ts
-import { model } from "@medusajs/framework/utils"
-import { Post } from "./post"
+import { model } from "@medusajs/framework/utils";
+import { Post } from "./post";
 
 export const Comment = model.define("comment", {
   id: model.id().primaryKey(),
@@ -73,7 +73,7 @@ export const Comment = model.define("comment", {
   post: model.belongsTo(() => Post, {
     mappedBy: "comments",
   }),
-})
+});
 ```
 
 ## Relationship Types

@@ -3,6 +3,7 @@
 Authentication in Medusa secures API routes and ensures only authorized users can access protected resources.
 
 ## Contents
+
 - [Default Protected Routes](#default-protected-routes)
 - [Authentication Methods](#authentication-methods)
 - [Custom Protected Routes](#custom-protected-routes)
@@ -14,11 +15,13 @@ Authentication in Medusa secures API routes and ensures only authorized users ca
 Medusa automatically protects certain route prefixes:
 
 ### Admin Routes (`/admin/*`)
+
 - **Who can access**: Authenticated admin users only
 - **Authentication methods**: Session, Bearer token, API key
 - **Example**: `/admin/products`, `/admin/custom-reports`
 
 ### Customer Routes (`/store/customers/me/*`)
+
 - **Who can access**: Authenticated customers only
 - **Authentication methods**: Session, Bearer token
 - **Example**: `/store/customers/me/orders`, `/store/customers/me/addresses`
@@ -28,16 +31,19 @@ Medusa automatically protects certain route prefixes:
 ## Authentication Methods
 
 ### Session Authentication
+
 - Used after login via email/password
 - Cookie-based session management
 - Automatically handled by Medusa SDK
 
 ### Bearer Token (JWT)
+
 - Token-based authentication
 - Passed in `Authorization: Bearer <token>` header
 - Used by frontend applications
 
 ### API Key
+
 - Admin-only authentication method
 - Used for server-to-server communication
 - Passed in `x-medusa-access-token` header
@@ -47,6 +53,7 @@ Medusa automatically protects certain route prefixes:
 **⚠️ CRITICAL: Only add `authenticate` middleware to routes OUTSIDE the default prefixes.**
 
 Routes with these prefixes are automatically authenticated - **do NOT add middleware:**
+
 - `/admin/*` - Already requires authenticated admin user
 - `/store/customers/me/*` - Already requires authenticated customer
 
@@ -55,21 +62,21 @@ Routes with these prefixes are automatically authenticated - **do NOT add middle
 export default defineMiddlewares({
   routes: [
     {
-      matcher: "/store/reviews*",  // Not a default protected prefix
+      matcher: "/store/reviews*", // Not a default protected prefix
       middlewares: [authenticate("customer", ["session", "bearer"])],
     },
   ],
-})
+});
 
 // ❌ WRONG - /admin routes are automatically authenticated
 export default defineMiddlewares({
   routes: [
     {
-      matcher: "/admin/reports*",  // Already protected!
+      matcher: "/admin/reports*", // Already protected!
       middlewares: [authenticate("user", ["session", "bearer"])], // Redundant!
     },
   ],
-})
+});
 ```
 
 To protect custom routes outside the default prefixes, use the `authenticate` middleware.
@@ -78,24 +85,20 @@ To protect custom routes outside the default prefixes, use the `authenticate` mi
 
 ```typescript
 // api/middlewares.ts
-import {
-  defineMiddlewares,
-  authenticate,
-} from "@medusajs/framework/http"
+import { defineMiddlewares, authenticate } from "@medusajs/framework/http";
 
 export default defineMiddlewares({
   routes: [
     {
       matcher: "/custom/admin*",
-      middlewares: [
-        authenticate("user", ["session", "bearer", "api-key"])
-      ],
+      middlewares: [authenticate("user", ["session", "bearer", "api-key"])],
     },
   ],
-})
+});
 ```
 
 **Parameters:**
+
 - First parameter: `"user"` for admin users, `"customer"` for customers
 - Second parameter: Array of allowed authentication methods
 
@@ -103,21 +106,16 @@ export default defineMiddlewares({
 
 ```typescript
 // api/middlewares.ts
-import {
-  defineMiddlewares,
-  authenticate,
-} from "@medusajs/framework/http"
+import { defineMiddlewares, authenticate } from "@medusajs/framework/http";
 
 export default defineMiddlewares({
   routes: [
     {
       matcher: "/store/reviews*",
-      middlewares: [
-        authenticate("customer", ["session", "bearer"])
-      ],
+      middlewares: [authenticate("customer", ["session", "bearer"])],
     },
   ],
-})
+});
 ```
 
 ### Multiple Protected Routes
@@ -142,7 +140,7 @@ export default defineMiddlewares({
       middlewares: [authenticate("customer", ["session", "bearer"])],
     },
   ],
-})
+});
 ```
 
 ## Accessing Authenticated User
@@ -158,17 +156,17 @@ Once a route is protected with the `authenticate` middleware, you can access the
 ```typescript
 // api/store/reviews/[id]/route.ts
 // Middleware already applied: authenticate("customer", ["session", "bearer"])
-import { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { deleteReviewWorkflow } from "../../../../workflows/delete-review"
+import { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http";
+import { deleteReviewWorkflow } from "../../../../workflows/delete-review";
 
 export async function DELETE(
   req: AuthenticatedMedusaRequest, // ✅ Use AuthenticatedMedusaRequest for protected routes
-  res: MedusaResponse
+  res: MedusaResponse,
 ) {
-  const { id } = req.params
+  const { id } = req.params;
   // ✅ CORRECT: Just use req.auth_context.actor_id directly
   // The authenticate middleware guarantees this exists
-  const customerId = req.auth_context.actor_id // No type error!
+  const customerId = req.auth_context.actor_id; // No type error!
 
   // Pass to workflow - let the workflow handle business logic validation
   const { result } = await deleteReviewWorkflow(req.scope).run({
@@ -176,9 +174,9 @@ export async function DELETE(
       reviewId: id,
       customerId, // Workflow will validate if review belongs to customer
     },
-  })
+  });
 
-  return res.json({ success: true })
+  return res.json({ success: true });
 }
 ```
 
@@ -187,16 +185,16 @@ export async function DELETE(
 ```typescript
 // api/store/reviews/[id]/route.ts
 // Middleware already applied: authenticate("customer", ["session", "bearer"])
-import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 
 export async function DELETE(
   req: MedusaRequest, // ❌ WRONG: Should use AuthenticatedMedusaRequest
-  res: MedusaResponse
+  res: MedusaResponse,
 ) {
-  const { id } = req.params
-  const customerId = req.auth_context.actor_id // ❌ Type error: auth_context might be undefined
+  const { id } = req.params;
+  const customerId = req.auth_context.actor_id; // ❌ Type error: auth_context might be undefined
 
-  return res.json({ success: true })
+  return res.json({ success: true });
 }
 ```
 
@@ -205,31 +203,29 @@ export async function DELETE(
 ```typescript
 // api/store/reviews/[id]/route.ts
 // Middleware already applied: authenticate("customer", ["session", "bearer"])
-import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { MedusaError } from "@medusajs/framework/utils"
+import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
+import { MedusaError } from "@medusajs/framework/utils";
 
 export async function DELETE(req: MedusaRequest, res: MedusaResponse) {
-  const { id } = req.params
+  const { id } = req.params;
 
   // ❌ WRONG: Don't manually check if user is authenticated
   // The authenticate middleware already did this!
   if (!req.auth_context?.actor_id) {
-    throw new MedusaError(
-      MedusaError.Types.UNAUTHORIZED,
-      "You must be authenticated"
-    )
+    throw new MedusaError(MedusaError.Types.UNAUTHORIZED, "You must be authenticated");
   }
 
-  const customerId = req.auth_context.actor_id
+  const customerId = req.auth_context.actor_id;
 
   // Also wrong: don't validate business logic in routes
   // (see workflows.md for why this should be in the workflow)
 
-  return res.json({ success: true })
+  return res.json({ success: true });
 }
 ```
 
 **Why manual checks are wrong:**
+
 - The `authenticate` middleware already validates authentication
 - If authentication failed, the request never reaches your handler
 - Manual checks suggest you don't trust or understand the middleware
@@ -239,19 +235,19 @@ export async function DELETE(req: MedusaRequest, res: MedusaResponse) {
 
 ```typescript
 // api/admin/custom/route.ts
-import { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 
 export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse) {
   // Get authenticated admin user ID
-  const userId = req.auth_context.actor_id
+  const userId = req.auth_context.actor_id;
 
-  const logger = req.scope.resolve("logger")
-  logger.info(`Request from admin user: ${userId}`)
+  const logger = req.scope.resolve("logger");
+  logger.info(`Request from admin user: ${userId}`);
 
   // Use userId to filter data or track actions
   // ...
 
-  return res.json({ success: true })
+  return res.json({ success: true });
 }
 ```
 
@@ -259,13 +255,13 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse) 
 
 ```typescript
 // api/store/reviews/route.ts
-import { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 
 export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse) {
   // Get authenticated customer ID
-  const customerId = req.auth_context.actor_id
+  const customerId = req.auth_context.actor_id;
 
-  const { product_id, rating, comment } = req.validatedBody
+  const { product_id, rating, comment } = req.validatedBody;
 
   // Create review associated with the authenticated customer
   const { result } = await createReviewWorkflow(req.scope).run({
@@ -275,9 +271,9 @@ export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse)
       rating,
       comment,
     },
-  })
+  });
 
-  return res.json({ review: result })
+  return res.json({ review: result });
 }
 ```
 
@@ -288,8 +284,8 @@ export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse)
 ```typescript
 // api/admin/my-reports/route.ts
 export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse) {
-  const userId = req.auth_context.actor_id
-  const query = req.scope.resolve("query")
+  const userId = req.auth_context.actor_id;
+  const query = req.scope.resolve("query");
 
   // Get reports created by this admin user
   const { data: reports } = await query.graph({
@@ -298,9 +294,9 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse) 
     filters: {
       created_by: userId,
     },
-  })
+  });
 
-  return res.json({ reports })
+  return res.json({ reports });
 }
 ```
 
@@ -312,8 +308,8 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse) 
 // api/store/reviews/[id]/route.ts
 // ✅ CORRECT - Pass user ID to workflow, let workflow validate ownership
 export async function DELETE(req: AuthenticatedMedusaRequest, res: MedusaResponse) {
-  const customerId = req.auth_context.actor_id
-  const { id } = req.params
+  const customerId = req.auth_context.actor_id;
+  const { id } = req.params;
 
   // Pass to workflow - workflow will validate ownership
   const { result } = await deleteReviewWorkflow(req.scope).run({
@@ -321,38 +317,38 @@ export async function DELETE(req: AuthenticatedMedusaRequest, res: MedusaRespons
       reviewId: id,
       customerId, // Workflow validates this review belongs to this customer
     },
-  })
+  });
 
-  return res.json({ success: true })
+  return res.json({ success: true });
 }
 
 // ❌ WRONG - Don't validate ownership in the route
 export async function DELETE(req: AuthenticatedMedusaRequest, res: MedusaResponse) {
-  const customerId = req.auth_context.actor_id
-  const { id } = req.params
-  const query = req.scope.resolve("query")
+  const customerId = req.auth_context.actor_id;
+  const { id } = req.params;
+  const query = req.scope.resolve("query");
 
   // ❌ WRONG: Don't check ownership in the route
   const { data: reviews } = await query.graph({
     entity: "review",
     fields: ["id", "customer_id"],
     filters: { id },
-  })
+  });
 
   if (!reviews || reviews.length === 0) {
-    throw new MedusaError(MedusaError.Types.NOT_FOUND, "Review not found")
+    throw new MedusaError(MedusaError.Types.NOT_FOUND, "Review not found");
   }
 
   if (reviews[0].customer_id !== customerId) {
-    throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "Not your review")
+    throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "Not your review");
   }
 
   // This bypasses workflow validation
   await deleteReviewWorkflow(req.scope).run({
     input: { id },
-  })
+  });
 
-  return res.status(204).send()
+  return res.status(204).send();
 }
 ```
 
@@ -365,8 +361,8 @@ export async function DELETE(req: AuthenticatedMedusaRequest, res: MedusaRespons
 // Automatically protected because it's under /store/customers/me/*
 
 export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse) {
-  const customerId = req.auth_context.actor_id
-  const query = req.scope.resolve("query")
+  const customerId = req.auth_context.actor_id;
+  const query = req.scope.resolve("query");
 
   // Get customer's wishlist
   const { data: wishlists } = await query.graph({
@@ -375,14 +371,14 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse) 
     filters: {
       customer_id: customerId,
     },
-  })
+  });
 
-  return res.json({ wishlist: wishlists[0] || null })
+  return res.json({ wishlist: wishlists[0] || null });
 }
 
 export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse) {
-  const customerId = req.auth_context.actor_id
-  const { product_id } = req.validatedBody
+  const customerId = req.auth_context.actor_id;
+  const { product_id } = req.validatedBody;
 
   // Add product to customer's wishlist
   const { result } = await addToWishlistWorkflow(req.scope).run({
@@ -390,9 +386,9 @@ export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse)
       customer_id: customerId,
       product_id,
     },
-  })
+  });
 
-  return res.json({ wishlist: result })
+  return res.json({ wishlist: result });
 }
 ```
 
@@ -401,8 +397,8 @@ export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse)
 ```typescript
 // api/admin/products/[id]/archive/route.ts
 export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse) {
-  const adminUserId = req.auth_context.actor_id
-  const { id } = req.params
+  const adminUserId = req.auth_context.actor_id;
+  const { id } = req.params;
 
   // Archive product and track who did it
   const { result } = await archiveProductWorkflow(req.scope).run({
@@ -411,12 +407,12 @@ export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse)
       archived_by: adminUserId,
       archived_at: new Date(),
     },
-  })
+  });
 
-  const logger = req.scope.resolve("logger")
-  logger.info(`Product ${id} archived by admin user ${adminUserId}`)
+  const logger = req.scope.resolve("logger");
+  logger.info(`Product ${id} archived by admin user ${adminUserId}`);
 
-  return res.json({ product: result })
+  return res.json({ product: result });
 }
 ```
 
@@ -426,10 +422,7 @@ Some routes may benefit from authentication but don't require it. Use the `authe
 
 ```typescript
 // api/middlewares.ts
-import {
-  defineMiddlewares,
-  authenticate,
-} from "@medusajs/framework/http"
+import { defineMiddlewares, authenticate } from "@medusajs/framework/http";
 
 export default defineMiddlewares({
   routes: [
@@ -438,19 +431,19 @@ export default defineMiddlewares({
       middlewares: [
         authenticate("customer", ["session", "bearer"], {
           allowUnauthenticated: true, // Allows access without authentication
-        })
+        }),
       ],
     },
   ],
-})
+});
 ```
 
 ```typescript
 // api/store/products/[id]/reviews/route.ts
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const customerId = req.auth_context?.actor_id // May be undefined
-  const { id } = req.params
-  const query = req.scope.resolve("query")
+  const customerId = req.auth_context?.actor_id; // May be undefined
+  const { id } = req.params;
+  const query = req.scope.resolve("query");
 
   // Get all reviews
   const { data: reviews } = await query.graph({
@@ -459,16 +452,16 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     filters: {
       product_id: id,
     },
-  })
+  });
 
   // If authenticated, mark customer's own reviews
   if (customerId) {
-    reviews.forEach(review => {
-      review.is_own = review.customer_id === customerId
-    })
+    reviews.forEach((review) => {
+      review.is_own = review.customer_id === customerId;
+    });
   }
 
-  return res.json({ reviews })
+  return res.json({ reviews });
 }
 ```
 
@@ -480,19 +473,19 @@ When using the Medusa JS SDK in storefronts:
 
 ```typescript
 // Frontend code
-import { sdk } from "./lib/sdk"
+import { sdk } from "./lib/sdk";
 
 // Login
 await sdk.auth.login("customer", "emailpass", {
   email: "customer@example.com",
   password: "password",
-})
+});
 
 // SDK automatically includes auth headers in subsequent requests
-const { customer } = await sdk.store.customer.retrieve()
+const { customer } = await sdk.store.customer.retrieve();
 
 // Access protected routes
-const { orders } = await sdk.store.customer.listOrders()
+const { orders } = await sdk.store.customer.listOrders();
 ```
 
 **⚠️ Verification is detected at login, not registration (v2.16.0+):**
@@ -500,16 +493,16 @@ const { orders } = await sdk.store.customer.listOrders()
 `sdk.auth.login()` may return `{ verification_required: true, verification, token }` instead of a usable token. `sdk.auth.register()` no longer reports whether verification is required, and its `options`/`returnVerification` parameter was removed. Always handle the `verification_required` branch after login:
 
 ```typescript
-const result = await sdk.auth.login("customer", "emailpass", { email, password })
+const result = await sdk.auth.login("customer", "emailpass", { email, password });
 
 if (typeof result !== "string" && result.verification_required) {
   // Request a code, then confirm it — note the flat, actor-agnostic signatures
   await sdk.auth.verification.request({
     entity_id: email,
     entity_type: "email",
-  })
+  });
   // ...user opens the verification link, then:
-  await sdk.auth.verification.confirm({ code })
+  await sdk.auth.verification.confirm({ code });
   // Log in again after confirming
 }
 ```
@@ -540,16 +533,16 @@ When using the Medusa JS SDK in admin applications:
 
 ```typescript
 // Admin frontend code
-import { sdk } from "./lib/sdk"
+import { sdk } from "./lib/sdk";
 
 // Login
 await sdk.auth.login("user", "emailpass", {
   email: "admin@example.com",
   password: "password",
-})
+});
 
 // SDK automatically includes JWT in Authorization header
-const { products } = await sdk.admin.product.list()
+const { products } = await sdk.admin.product.list();
 ```
 
 ## Security Best Practices
@@ -558,23 +551,23 @@ const { products } = await sdk.admin.product.list()
 
 ```typescript
 // ✅ GOOD: Uses authenticated context
-const customerId = req.auth_context.actor_id
+const customerId = req.auth_context.actor_id;
 
 // ❌ BAD: Takes user ID from request
-const { customer_id } = req.validatedBody // ❌ Can be spoofed
+const { customer_id } = req.validatedBody; // ❌ Can be spoofed
 ```
 
 ### 2. Appropriate Authentication Methods
 
 ```typescript
 // ✅ GOOD: Admin routes support all methods
-authenticate("user", ["session", "bearer", "api-key"])
+authenticate("user", ["session", "bearer", "api-key"]);
 
 // ✅ GOOD: Customer routes use session/bearer only
-authenticate("customer", ["session", "bearer"])
+authenticate("customer", ["session", "bearer"]);
 
 // ❌ BAD: Customer routes with API key
-authenticate("customer", ["api-key"]) // API keys are for admin only
+authenticate("customer", ["api-key"]); // API keys are for admin only
 ```
 
 ### 3. Don't Expose Sensitive Data
@@ -582,14 +575,14 @@ authenticate("customer", ["api-key"]) // API keys are for admin only
 ```typescript
 // ✅ GOOD: Filters sensitive fields
 export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse) {
-  const customerId = req.auth_context.actor_id
+  const customerId = req.auth_context.actor_id;
 
-  const customer = await getCustomer(customerId)
+  const customer = await getCustomer(customerId);
 
   // Remove sensitive data before sending
-  delete customer.password_hash
-  delete customer.metadata?.internal_notes
+  delete customer.password_hash;
+  delete customer.metadata?.internal_notes;
 
-  return res.json({ customer })
+  return res.json({ customer });
 }
 ```

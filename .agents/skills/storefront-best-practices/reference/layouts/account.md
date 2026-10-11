@@ -20,6 +20,7 @@ Account pages allow customers to manage orders, save addresses, update preferenc
 **Backend Integration (CRITICAL):**
 
 All customer data (orders, addresses, profile, payment methods) must be fetched from the ecommerce backend. Change this based on backend integrated. Never hardcode or mock account data. Consult backend documentation for:
+
 - Customer data endpoints (profile, preferences)
 - Order history and details endpoints
 - Address CRUD operations
@@ -38,6 +39,7 @@ All customer data (orders, addresses, profile, payment methods) must be fetched 
 ### Purpose
 
 **Primary ecommerce functions:**
+
 - Reduce checkout friction (saved addresses, payment methods)
 - Increase repeat purchases (order history, reorder button)
 - Reduce support load (order tracking, self-service returns)
@@ -49,12 +51,14 @@ All customer data (orders, addresses, profile, payment methods) must be fetched 
 Landing page after login. Purpose: Quick access to recent activity and common actions.
 
 **Display (prioritize recent orders):**
+
 - Welcome message with customer name
 - Recent orders (3-5 most recent with status)
 - Quick actions: Track order, Reorder, Manage addresses
 - Account summary (saved addresses count, loyalty points)
 
 **Reorder functionality (CRITICAL for repeat purchases):**
+
 - Check first that feature is available in the admin.
 - "Reorder" button on each order card
 - Adds same items to cart (check stock availability first)
@@ -62,6 +66,7 @@ Landing page after login. Purpose: Quick access to recent activity and common ac
 - Don't navigate away (stay on dashboard)
 
 **Example dashboard:**
+
 ```
 Welcome back, Sarah!
 
@@ -83,6 +88,7 @@ Quick Actions
 Display all past orders with filtering and search.
 
 **Order card essentials:**
+
 - Order number (clickable to details page)
 - Order date and status badge (Processing, Shipped, Delivered)
 - Total amount
@@ -90,17 +96,20 @@ Display all past orders with filtering and search.
 - Quick actions: Track, View Details, Reorder, Invoice
 
 **Status indicators (color-coded):**
+
 - Processing: Yellow/Orange
 - Shipped: Blue
 - Delivered: Green
 - Cancelled: Gray/Red
 
 **Filtering and search:**
+
 - Date range (Last 30 days, Last 6 months, All time)
 - Status filter (All, Processing, Shipped, Delivered)
 - Search by order number or product name
 
 **Sorting:**
+
 - Most recent first (default)
 - Oldest first
 - Highest/lowest price
@@ -113,11 +122,13 @@ Show 10-20 orders per page with pagination controls. Alternative: "Load More" bu
 Full order information page.
 
 **Display:**
+
 - Order number, date, status with progress timeline
 - Tracking number with carrier link (if shipped)
 - Estimated delivery date
 
 **Status timeline (builds trust):**
+
 ```
 ✓ Order Placed (Jan 27, 9:45 AM)
 ✓ Processing (Jan 27, 10:30 AM)
@@ -127,6 +138,7 @@ Full order information page.
 ```
 
 **Order information:**
+
 - Items ordered (image, name, variant, quantity, price)
 - Pricing breakdown (subtotal, shipping, tax, discounts, total)
 - Shipping address and method
@@ -134,6 +146,7 @@ Full order information page.
 - Payment method (last 4 digits)
 
 **Order actions:**
+
 - Track shipment (link to carrier tracking page)
 - Download invoice/receipt (PDF)
 - Request return (if eligible and backend supports)
@@ -145,6 +158,7 @@ Full order information page.
 **Purpose**: Increase repeat purchases by making it easy to reorder past purchases.
 
 **Implementation:**
+
 - "Reorder" button on order cards and order details
 - Check stock availability before adding to cart
 - Handle discontinued products gracefully (skip or notify)
@@ -161,6 +175,7 @@ Full order information page.
 ### Why Addresses Matter
 
 **Conversion optimization:**
+
 - Saved addresses reduce checkout time by 50%+ (no retyping)
 - Default address selection streamlines checkout flow
 - Reduces form abandonment (fewer fields to fill)
@@ -172,12 +187,14 @@ Fetch, create, update, and delete addresses via backend API. Do this based on ba
 ### Address Book Display
 
 **Saved addresses list:**
+
 - All saved addresses
 - Default address indicator (badge: "Default Shipping" or star icon)
 - Address preview: Name, street, city, state, zip
 - Quick actions: Edit, Delete, Set as Default
 
 **Default address behavior:**
+
 - One default shipping address
 - One default billing address (separate or same)
 - Used automatically at checkout (user can change)
@@ -188,6 +205,7 @@ Fetch, create, update, and delete addresses via backend API. Do this based on ba
 Collect standard shipping information. Key considerations:
 
 **Required fields:**
+
 - Full name (or first + last)
 - Address line 1
 - City, State/Province, ZIP/Postal code
@@ -195,6 +213,7 @@ Collect standard shipping information. Key considerations:
 - Phone number (recommended for delivery coordination)
 
 **Optional enhancements:**
+
 - Address label (Home, Work) for easy identification
 - Address autocomplete API (Google Places) for accuracy
 - "Set as default" checkbox
@@ -205,11 +224,13 @@ Real-time validation, especially for ZIP/postal code format based on country.
 ## Payment Methods
 
 **Note**: Payment method storage is optional. Only implement if:
+
 - Backend securely handles tokenized payment data
 - PCI DSS compliance requirements are met
 - Payment gateway supports tokenization (Stripe, Braintree)
 
 **Security (CRITICAL):**
+
 - Never store full card numbers (tokenize with payment gateway)
 - Display last 4 digits only
 - Don't store CVV
@@ -217,6 +238,7 @@ Real-time validation, especially for ZIP/postal code format based on country.
 - Show "Securely stored" badge for trust
 
 **Saved payment display:**
+
 - Card type logo (Visa, Mastercard)
 - Last 4 digits
 - Expiration date
@@ -232,6 +254,7 @@ Real-time validation, especially for ZIP/postal code format based on country.
 Display and edit customer information.
 
 **Standard fields:**
+
 - Full name
 - Email (with verification status)
 - Phone number
@@ -246,6 +269,7 @@ If unverified, show warning with "Resend verification email" button. If verified
 ### Security Settings
 
 **Password change:**
+
 - Require current password (optional)
 - New password with strength indicator
 - Confirm new password
@@ -268,6 +292,7 @@ Ecommerce-specific email controls.
 Checkbox list or toggle switches with clear descriptions. Save button at bottom.
 
 **Example:**
+
 ```
 Email Preferences
 
@@ -293,18 +318,21 @@ Individual opt-outs per type, "Unsubscribe from all marketing" button. Keep tran
 Choose based on account complexity:
 
 **Sidebar Navigation (Recommended):**
+
 - **Use when**: 6+ account sections, complex account features
 - Desktop: Vertical sidebar (20-25% width) with section links
 - Mobile: Collapse to hamburger menu or dropdown
 - Benefits: Persistent navigation, professional, accommodates many sections
 
 **Tab Navigation:**
+
 - **Use when**: 4-6 account sections, simpler account structure
 - Horizontal tabs at top, active tab highlighted
 - Mobile: Horizontal scroll or dropdown
 - Benefits: Modern, clean, quick switching
 
 **Account Hub (Mobile-First):**
+
 - **Use when**: Mobile-heavy traffic, simple account
 - Landing page with section cards (2-column grid)
 - Tap card to enter section, back button returns to hub
@@ -313,6 +341,7 @@ Choose based on account complexity:
 ### Section Organization
 
 **Recommended order (most to least used):**
+
 1. Dashboard (landing page)
 2. Orders (most accessed)
 3. Addresses (important for checkout)

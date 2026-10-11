@@ -3,6 +3,7 @@
 API routes (also called "endpoints") are the primary way to expose custom functionality to storefronts and admin dashboards.
 
 ## Contents
+
 - [Path Conventions](#path-conventions)
 - [Middleware Validation](#middleware-validation)
 - [Query Parameter Validation](#query-parameter-validation)
@@ -15,11 +16,13 @@ API routes (also called "endpoints") are the primary way to expose custom functi
 ## Path Conventions
 
 ### Store API Routes (Storefront)
+
 - **Path prefix**: `/store/<rest-of-path>`
 - **Examples**: `/store/newsletter-signup`, `/store/custom-search`
 - **Authentication**: SDK automatically includes publishable API key
 
 ### Admin API Routes (Dashboard)
+
 - **Path prefix**: `/admin/<rest-of-path>`
 - **Examples**: `/admin/custom-reports`, `/admin/bulk-operations`
 - **Authentication**: SDK automatically includes auth headers (bearer/session)
@@ -43,11 +46,11 @@ export default defineMiddlewares({
       method: "POST",
       middlewares: [
         authenticate("customer", ["session", "bearer"]),
-        validateAndTransformBody(CreateReviewSchema)
+        validateAndTransformBody(CreateReviewSchema),
       ],
     },
   ],
-})
+});
 
 // ❌ WRONG - Don't nest validator inside authenticate
 export default defineMiddlewares({
@@ -55,12 +58,14 @@ export default defineMiddlewares({
     {
       matcher: "/store/products/:id/reviews",
       method: "POST",
-      middlewares: [authenticate("customer", ["session", "bearer"], {
-        validator: CreateReviewSchema  // This doesn't work!
-      })],
+      middlewares: [
+        authenticate("customer", ["session", "bearer"], {
+          validator: CreateReviewSchema, // This doesn't work!
+        }),
+      ],
     },
   ],
-})
+});
 ```
 
 **Middleware order matters:** Put `authenticate` before `validateAndTransformBody` so authentication happens first.
@@ -69,17 +74,17 @@ export default defineMiddlewares({
 
 ```typescript
 // api/store/[feature]/middlewares.ts
-import { MiddlewareRoute, validateAndTransformBody } from "@medusajs/framework"
-import { z } from "@medusajs/framework/zod"
+import { MiddlewareRoute, validateAndTransformBody } from "@medusajs/framework";
+import { z } from "@medusajs/framework/zod";
 
 export const CreateMySchema = z.object({
   email: z.email(),
   name: z.string().min(2),
   // other fields
-})
+});
 
 // Export the inferred type for use in route handlers
-export type CreateMySchema = z.infer<typeof CreateMySchema>
+export type CreateMySchema = z.infer<typeof CreateMySchema>;
 
 export const myMiddlewares: MiddlewareRoute[] = [
   {
@@ -87,19 +92,19 @@ export const myMiddlewares: MiddlewareRoute[] = [
     method: "POST",
     middlewares: [validateAndTransformBody(CreateMySchema)],
   },
-]
+];
 ```
 
 ### Step 2: Register in api/middlewares.ts
 
 ```typescript
 // api/middlewares.ts
-import { defineMiddlewares } from "@medusajs/framework/http"
-import { myMiddlewares } from "./store/[feature]/middlewares"
+import { defineMiddlewares } from "@medusajs/framework/http";
+import { myMiddlewares } from "./store/[feature]/middlewares";
 
 export default defineMiddlewares({
   routes: [...myMiddlewares],
-})
+});
 ```
 
 **⚠️ CRITICAL - Middleware Export Pattern:**
@@ -115,15 +120,15 @@ export const reviewMiddlewares: MiddlewareRoute[] = [
     method: "POST",
     middlewares: [validateAndTransformBody(CreateReviewSchema)],
   },
-]
+];
 
 // ✅ CORRECT - Import and spread the named array
 // api/middlewares.ts
-import { reviewMiddlewares } from "./store/reviews/middlewares"
+import { reviewMiddlewares } from "./store/reviews/middlewares";
 
 export default defineMiddlewares({
   routes: [...reviewMiddlewares],
-})
+});
 ```
 
 ```typescript
@@ -144,6 +149,7 @@ export default defineMiddlewares({
 ```
 
 **Why this matters:**
+
 - Middleware files export arrays directly, not config objects
 - Route files (like `route.ts`) use `export const config = defineRouteConfig(...)`
 - Don't confuse the two patterns - middlewares are simpler (just an array)
@@ -154,23 +160,20 @@ export default defineMiddlewares({
 
 ```typescript
 // api/store/my-route/route.ts
-import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { CreateMySchema } from "./middlewares"
+import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
+import { CreateMySchema } from "./middlewares";
 
 // ✅ CORRECT: Pass the Zod schema type as type argument
-export async function POST(
-  req: MedusaRequest<CreateMySchema>,
-  res: MedusaResponse
-) {
+export async function POST(req: MedusaRequest<CreateMySchema>, res: MedusaResponse) {
   // Now req.validatedBody is properly typed
-  const { email, name } = req.validatedBody
+  const { email, name } = req.validatedBody;
 
   // ... rest of implementation
 }
 
 // ❌ WRONG: Without type argument, req.validatedBody will have type errors
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
-  const { email, name } = req.validatedBody // Type error!
+  const { email, name } = req.validatedBody; // Type error!
 }
 ```
 
@@ -186,66 +189,58 @@ Create a Zod schema for the query parameters. Since query parameters are origina
 
 ```typescript
 // api/custom/validators.ts
-import { z } from "@medusajs/framework/zod"
+import { z } from "@medusajs/framework/zod";
 
 export const GetMyRouteSchema = z.object({
   cart_id: z.string(), // String parameters don't need preprocessing
-  limit: z.preprocess(
-    (val) => {
-      if (val && typeof val === "string") {
-        return parseInt(val)
-      }
-      return val
-    },
-    z.number().optional()
-  ),
+  limit: z.preprocess((val) => {
+    if (val && typeof val === "string") {
+      return parseInt(val);
+    }
+    return val;
+  }, z.number().optional()),
   status: z.enum(["active", "pending", "completed"]).optional(),
-})
+});
 ```
 
 ### Step 2: Add Middleware
 
 ```typescript
 // api/middlewares.ts
-import {
-  validateAndTransformQuery,
-  defineMiddlewares,
-} from "@medusajs/framework/http"
-import { GetMyRouteSchema } from "./custom/validators"
+import { validateAndTransformQuery, defineMiddlewares } from "@medusajs/framework/http";
+import { GetMyRouteSchema } from "./custom/validators";
 
 export default defineMiddlewares({
   routes: [
     {
       matcher: "/store/my-route",
       method: "GET",
-      middlewares: [
-        validateAndTransformQuery(GetMyRouteSchema, {}),
-      ],
+      middlewares: [validateAndTransformQuery(GetMyRouteSchema, {})],
     },
   ],
-})
+});
 ```
 
 ### Step 3: Use Validated Query in Route
 
 ```typescript
 // api/store/my-route/route.ts
-import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   // Access validated query parameters (not req.query!)
-  const { cart_id, limit, status } = req.validatedQuery
+  const { cart_id, limit, status } = req.validatedQuery;
 
   // cart_id is string, limit is number, status is enum
-  const query = req.scope.resolve("query")
+  const query = req.scope.resolve("query");
 
   const { data } = await query.graph({
     entity: "my_entity",
     fields: ["id", "name"],
     filters: { cart_id, status },
-  })
+  });
 
-  return res.json({ items: data })
+  return res.json({ items: data });
 }
 ```
 
@@ -254,6 +249,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 **⚠️ BEST PRACTICE**: For API routes that retrieve lists of resources, use request query config to allow clients to control fields, pagination, and ordering.
 
 This pattern:
+
 - Allows clients to specify which fields/relations to retrieve
 - Enables client-controlled pagination
 - Supports custom ordering
@@ -263,18 +259,15 @@ This pattern:
 
 ```typescript
 // api/middlewares.ts
-import {
-  validateAndTransformQuery,
-  defineMiddlewares,
-} from "@medusajs/framework/http"
-import { createFindParams } from "@medusajs/medusa/api/utils/validators"
+import { validateAndTransformQuery, defineMiddlewares } from "@medusajs/framework/http";
+import { createFindParams } from "@medusajs/medusa/api/utils/validators";
 
 // createFindParams() generates a schema that accepts:
 // - fields: Select specific fields/relations
 // - offset: Skip N items
 // - limit: Max items to return
 // - order: Order by field(s) ASC/DESC
-export const GetProductsSchema = createFindParams()
+export const GetProductsSchema = createFindParams();
 
 export default defineMiddlewares({
   routes: [
@@ -282,25 +275,23 @@ export default defineMiddlewares({
       matcher: "/store/products",
       method: "GET",
       middlewares: [
-        validateAndTransformQuery(
-          GetProductsSchema,
-          {
-            defaults: [
-              "id",
-              "title",
-              "variants.*", // Include all variant fields by default
-            ],
-            isList: true, // Indicates this returns a list
-            defaultLimit: 15, // Default pagination limit
-          }
-        ),
+        validateAndTransformQuery(GetProductsSchema, {
+          defaults: [
+            "id",
+            "title",
+            "variants.*", // Include all variant fields by default
+          ],
+          isList: true, // Indicates this returns a list
+          defaultLimit: 15, // Default pagination limit
+        }),
       ],
     },
   ],
-})
+});
 ```
 
 **Configuration Options:**
+
 - `defaults`: Array of default fields and relations to retrieve
 - `isList`: Boolean indicating if this returns a list (affects pagination)
 - `allowed`: (Optional) Array of fields/relations allowed in the `fields` query param
@@ -312,31 +303,31 @@ export default defineMiddlewares({
 
 ```typescript
 // api/store/products/route.ts
-import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve("query")
+  const query = req.scope.resolve("query");
 
   // ✅ CORRECT: Only use ...req.queryConfig (includes fields, pagination, etc.)
   const { data: products } = await query.graph({
     entity: "product",
     ...req.queryConfig, // Contains fields, select, limit, offset, order
-  })
+  });
 
-  return res.json({ products })
+  return res.json({ products });
 }
 
 // ❌ WRONG: Don't set fields explicitly when using queryConfig
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve("query")
+  const query = req.scope.resolve("query");
 
   const { data: products } = await query.graph({
     entity: "product",
     fields: ["id", "title"], // ❌ Type error! queryConfig already sets fields
     ...req.queryConfig,
-  })
+  });
 
-  return res.json({ products })
+  return res.json({ products });
 }
 ```
 
@@ -344,17 +335,17 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
 ```typescript
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve("query")
-  const { id } = req.params
+  const query = req.scope.resolve("query");
+  const { id } = req.params;
 
   // ✅ CORRECT: Add filters while using queryConfig
   const { data: products } = await query.graph({
     entity: "product",
     filters: { id }, // Additional filters are OK
     ...req.queryConfig, // Fields come from here
-  })
+  });
 
-  return res.json({ products })
+  return res.json({ products });
 }
 ```
 
@@ -393,16 +384,15 @@ You can combine custom query parameters with query config:
 
 ```typescript
 // validators.ts
-import { z } from "@medusajs/framework/zod"
-import { createFindParams } from "@medusajs/medusa/api/utils/validators"
+import { z } from "@medusajs/framework/zod";
+import { createFindParams } from "@medusajs/medusa/api/utils/validators";
 
-export const GetProductsSchema = z.object({
-  category_id: z.string().optional(),
-  in_stock: z.preprocess(
-    (val) => val === "true",
-    z.boolean().optional()
-  ),
-}).extend(createFindParams().shape)
+export const GetProductsSchema = z
+  .object({
+    category_id: z.string().optional(),
+    in_stock: z.preprocess((val) => val === "true", z.boolean().optional()),
+  })
+  .extend(createFindParams().shape);
 ```
 
 **⚠️ Zod v4:** Medusa uses Zod v4 (since v2.14.0), where `.merge()` is removed. Combine schemas with `.extend(otherSchema.shape)`, and always import Zod from `@medusajs/framework/zod` — not from `zod` directly.
@@ -410,20 +400,20 @@ export const GetProductsSchema = z.object({
 ```typescript
 // route.ts
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve("query")
-  const { category_id, in_stock } = req.validatedQuery
+  const query = req.scope.resolve("query");
+  const { category_id, in_stock } = req.validatedQuery;
 
-  const filters: any = {}
-  if (category_id) filters.category_id = category_id
-  if (in_stock !== undefined) filters.in_stock = in_stock
+  const filters: any = {};
+  if (category_id) filters.category_id = category_id;
+  if (in_stock !== undefined) filters.in_stock = in_stock;
 
   const { data: products } = await query.graph({
     entity: "product",
     filters,
     ...req.queryConfig, // Still get fields, pagination, order
-  })
+  });
 
-  return res.json({ products })
+  return res.json({ products });
 }
 ```
 
@@ -435,19 +425,16 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
 ```typescript
 // api/store/reviews/route.ts
-import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { createReviewWorkflow } from "../../../workflows/create-review"
-import { CreateReviewSchema } from "./middlewares"
+import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
+import { createReviewWorkflow } from "../../../workflows/create-review";
+import { CreateReviewSchema } from "./middlewares";
 
-export async function POST(
-  req: MedusaRequest<CreateReviewSchema>,
-  res: MedusaResponse
-) {
+export async function POST(req: MedusaRequest<CreateReviewSchema>, res: MedusaResponse) {
   const { result } = await createReviewWorkflow(req.scope).run({
-    input: req.validatedBody
-  })
+    input: req.validatedBody,
+  });
 
-  return res.json({ review: result })
+  return res.json({ review: result });
 }
 ```
 
@@ -455,21 +442,22 @@ export async function POST(
 
 ```typescript
 // api/store/reviews/route.ts
-import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   // ❌ WRONG: Don't use dynamic imports in route handlers
-  const { createReviewWorkflow } = await import("../../../workflows/create-review")
+  const { createReviewWorkflow } = await import("../../../workflows/create-review");
 
   const { result } = await createReviewWorkflow(req.scope).run({
-    input: req.validatedBody
-  })
+    input: req.validatedBody,
+  });
 
-  return res.json({ review: result })
+  return res.json({ review: result });
 }
 ```
 
 **Why this matters:**
+
 - Dynamic imports add unnecessary overhead to every request
 - Makes code harder to read and maintain
 - Breaks static analysis and TypeScript checking
@@ -478,6 +466,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 ## API Route Structure
 
 **⚠️ IMPORTANT**: Medusa uses only GET, POST and DELETE as a convention.
+
 - **GET** for reads
 - **POST** for mutations (create/update)
 - **DELETE** for deletions
@@ -488,30 +477,30 @@ Don't use PUT or PATCH.
 
 ```typescript
 // api/store/my-route/route.ts
-import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { MedusaError } from "@medusajs/framework/utils"
+import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
+import { MedusaError } from "@medusajs/framework/utils";
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve("query")
+  const query = req.scope.resolve("query");
 
   // Query data
   const { data: items } = await query.graph({
     entity: "entity_name",
     fields: ["id", "name"],
-  })
+  });
 
-  return res.status(200).json({ items })
+  return res.status(200).json({ items });
 }
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
-  const { field } = req.validatedBody
+  const { field } = req.validatedBody;
 
   // Execute workflow (mutations should always use workflows)
   const { result } = await myWorkflow(req.scope).run({
     input: { field },
-  })
+  });
 
-  return res.status(200).json({ result })
+  return res.status(200).json({ result });
 }
 ```
 
@@ -519,17 +508,17 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
 ```typescript
 // Validated body (from middleware)
-const { email, name } = req.validatedBody
+const { email, name } = req.validatedBody;
 
 // Query parameters
-const { page, limit } = req.query
+const { page, limit } = req.query;
 
 // Route parameters
-const { id } = req.params
+const { id } = req.params;
 
 // Resolve services
-const query = req.scope.resolve("query")
-const myService = req.scope.resolve("my-module")
+const query = req.scope.resolve("query");
+const myService = req.scope.resolve("my-module");
 ```
 
 ## Error Handling
@@ -537,19 +526,22 @@ const myService = req.scope.resolve("my-module")
 Use `MedusaError` for consistent error responses:
 
 ```typescript
-import { MedusaError } from "@medusajs/framework/utils"
+import { MedusaError } from "@medusajs/framework/utils";
 
 // Not found
-throw new MedusaError(MedusaError.Types.NOT_FOUND, "Resource not found")
+throw new MedusaError(MedusaError.Types.NOT_FOUND, "Resource not found");
 
 // Invalid data
-throw new MedusaError(MedusaError.Types.INVALID_DATA, "Invalid input provided")
+throw new MedusaError(MedusaError.Types.INVALID_DATA, "Invalid input provided");
 
 // Unauthorized
-throw new MedusaError(MedusaError.Types.UNAUTHORIZED, "Authentication required")
+throw new MedusaError(MedusaError.Types.UNAUTHORIZED, "Authentication required");
 
 // Conflict (message is replaced by a default; use NOT_ALLOWED if the client needs details)
-throw new MedusaError(MedusaError.Types.CONFLICT, "Operation conflicts with an ongoing transaction")
+throw new MedusaError(
+  MedusaError.Types.CONFLICT,
+  "Operation conflicts with an ongoing transaction",
+);
 
 // Other types: INVALID_STATE, NOT_ALLOWED, DUPLICATE_ERROR
 ```
@@ -570,6 +562,7 @@ Medusa automatically formats errors:
 ### Default Protected Routes
 
 All routes under these prefixes are automatically protected:
+
 - `/admin/*` - Requires authenticated admin user
 - `/store/customers/me/*` - Requires authenticated customer
 
@@ -579,10 +572,7 @@ To protect routes under different prefixes, use the `authenticate` middleware:
 
 ```typescript
 // api/middlewares.ts
-import {
-  defineMiddlewares,
-  authenticate,
-} from "@medusajs/framework/http"
+import { defineMiddlewares, authenticate } from "@medusajs/framework/http";
 
 export default defineMiddlewares({
   routes: [
@@ -597,7 +587,7 @@ export default defineMiddlewares({
       middlewares: [authenticate("customer", ["session", "bearer"])],
     },
   ],
-})
+});
 ```
 
 ### Accessing Authenticated User
@@ -605,25 +595,22 @@ export default defineMiddlewares({
 **⚠️ CRITICAL**: For routes protected with `authenticate` middleware, you MUST use `AuthenticatedMedusaRequest` instead of `MedusaRequest` to avoid type errors when accessing `req.auth_context.actor_id`.
 
 ```typescript
-import { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 
 // ✅ CORRECT - Use AuthenticatedMedusaRequest for protected routes
-export async function POST(
-  req: AuthenticatedMedusaRequest,
-  res: MedusaResponse
-) {
+export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse) {
   // For admin routes
-  const userId = req.auth_context.actor_id // Admin user ID
+  const userId = req.auth_context.actor_id; // Admin user ID
 
   // For customer routes
-  const customerId = req.auth_context.actor_id // Customer ID
+  const customerId = req.auth_context.actor_id; // Customer ID
 
   // Your logic here
 }
 
 // ❌ WRONG - Don't use MedusaRequest for protected routes
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
-  const userId = req.auth_context.actor_id // Type error!
+  const userId = req.auth_context.actor_id; // Type error!
 }
 ```
 
@@ -636,10 +623,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 ### Example: Create Workflow
 
 ```typescript
-import { createCustomersWorkflow } from "@medusajs/medusa/core-flows"
+import { createCustomersWorkflow } from "@medusajs/medusa/core-flows";
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
-  const { email } = req.validatedBody
+  const { email } = req.validatedBody;
 
   const { result } = await createCustomersWorkflow(req.scope).run({
     input: {
@@ -650,31 +637,28 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         },
       ],
     },
-  })
+  });
 
-  return res.json({ customer: result[0] })
+  return res.json({ customer: result[0] });
 }
 ```
 
 ### Example: Custom Workflow
 
 ```typescript
-import { myCustomWorkflow } from "../../workflows/my-workflow"
+import { myCustomWorkflow } from "../../workflows/my-workflow";
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
-  const { data } = req.validatedBody
+  const { data } = req.validatedBody;
 
   try {
     const { result } = await myCustomWorkflow(req.scope).run({
       input: { data },
-    })
+    });
 
-    return res.json({ result })
+    return res.json({ result });
   } catch (error) {
-    throw new MedusaError(
-      MedusaError.Types.INVALID_DATA,
-      error.message
-    )
+    throw new MedusaError(MedusaError.Types.INVALID_DATA, error.message);
   }
 }
 ```
@@ -682,6 +666,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 ## Common Built-in Workflows
 
 Ask MedusaDocs for specific workflow names and their input parameters:
+
 - Customer workflows: create, update, delete customers
 - Product workflows: create, update, delete products
 - Order workflows: create, cancel, fulfill orders
@@ -718,10 +703,10 @@ src/api/
 
 ```typescript
 // middlewares.ts
-import { validateAndTransformQuery } from "@medusajs/framework/http"
-import { createFindParams } from "@medusajs/medusa/api/utils/validators"
+import { validateAndTransformQuery } from "@medusajs/framework/http";
+import { createFindParams } from "@medusajs/medusa/api/utils/validators";
 
-export const GetMyEntitiesSchema = createFindParams()
+export const GetMyEntitiesSchema = createFindParams();
 
 export default defineMiddlewares({
   routes: [
@@ -737,23 +722,23 @@ export default defineMiddlewares({
       ],
     },
   ],
-})
+});
 
 // route.ts
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve("query")
+  const query = req.scope.resolve("query");
 
   const { data, metadata } = await query.graph({
     entity: "my_entity",
     ...req.queryConfig, // Handles fields, pagination automatically
-  })
+  });
 
   return res.json({
     items: data,
     count: metadata.count,
     limit: req.queryConfig.pagination.take,
     offset: req.queryConfig.pagination.skip,
-  })
+  });
 }
 ```
 
@@ -762,7 +747,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 ```typescript
 // For single resource endpoints, you can still use query config
 // middlewares.ts
-export const GetMyEntitySchema = createFindParams()
+export const GetMyEntitySchema = createFindParams();
 
 export default defineMiddlewares({
   routes: [
@@ -777,24 +762,24 @@ export default defineMiddlewares({
       ],
     },
   ],
-})
+});
 
 // route.ts
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve("query")
-  const { id } = req.params
+  const query = req.scope.resolve("query");
+  const { id } = req.params;
 
   const { data } = await query.graph({
     entity: "my_entity",
     filters: { id },
     ...req.queryConfig,
-  })
+  });
 
   if (!data || data.length === 0) {
-    throw new MedusaError(MedusaError.Types.NOT_FOUND, "Resource not found")
+    throw new MedusaError(MedusaError.Types.NOT_FOUND, "Resource not found");
   }
 
-  return res.json({ item: data[0] })
+  return res.json({ item: data[0] });
 }
 ```
 
@@ -802,10 +787,12 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
 ```typescript
 // validators.ts
-export const GetMyEntitiesSchema = z.object({
-  q: z.string().optional(), // Search query
-  status: z.enum(["active", "pending", "completed"]).optional(),
-}).extend(createFindParams().shape)
+export const GetMyEntitiesSchema = z
+  .object({
+    q: z.string().optional(), // Search query
+    status: z.enum(["active", "pending", "completed"]).optional(),
+  })
+  .extend(createFindParams().shape);
 
 // middlewares.ts
 export default defineMiddlewares({
@@ -821,30 +808,30 @@ export default defineMiddlewares({
       ],
     },
   ],
-})
+});
 
 // route.ts
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve("query")
-  const { q, status } = req.validatedQuery
+  const query = req.scope.resolve("query");
+  const { q, status } = req.validatedQuery;
 
-  const filters: any = {}
+  const filters: any = {};
 
   if (q) {
-    filters.name = { $like: `%${q}%` }
+    filters.name = { $like: `%${q}%` };
   }
 
   if (status) {
-    filters.status = status
+    filters.status = status;
   }
 
   const { data } = await query.graph({
     entity: "my_entity",
     filters,
     ...req.queryConfig, // Client can still control fields, pagination
-  })
+  });
 
-  return res.json({ items: data })
+  return res.json({ items: data });
 }
 ```
 
@@ -854,7 +841,7 @@ For simple queries where you don't need client-controlled fields/pagination:
 
 ```typescript
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve("query")
+  const query = req.scope.resolve("query");
 
   const { data } = await query.graph({
     entity: "my_entity",
@@ -864,8 +851,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       take: 10,
       skip: 0,
     },
-  })
+  });
 
-  return res.json({ items: data })
+  return res.json({ items: data });
 }
 ```

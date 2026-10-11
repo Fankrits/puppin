@@ -36,6 +36,7 @@ Fetch order details from backend API immediately after checkout completes. Do th
 Large, prominent heading, positive reassuring message, success icon (green checkmark), immediately visible above fold.
 
 **Example messages:**
+
 - "Order Confirmed!"
 - "Thank you for your order!"
 - "Success! Your order is confirmed"
@@ -44,6 +45,7 @@ Large, prominent heading, positive reassuring message, success icon (green check
 Brief reassurance, email confirmation mention, delivery timeframe preview.
 
 **Example:**
+
 ```
 ✓ Order Confirmed!
 
@@ -54,6 +56,7 @@ email to customer@example.com with your order details.
 ### Order Number
 
 **Display requirements:**
+
 - Very prominent
 - Clearly labeled "Order Number:" or "Order #"
 - Easy to select and copy (selectable text)
@@ -62,6 +65,7 @@ email to customer@example.com with your order details.
 - Optional: Copy button next to number
 
 **Example:**
+
 ```
 Order Number: #ORD-123456789
 ```
@@ -75,6 +79,7 @@ Confirmation email was sent, email address used, check spam folder reminder (opt
 ### Ordered Items List
 
 Display per item:
+
 - Product image (thumbnail, 60-80px)
 - Product title (full name)
 - Variant information (size, color, etc.)
@@ -85,6 +90,7 @@ Display per item:
 ### Order Summary (Pricing)
 
 **Price breakdown:**
+
 - Subtotal (sum of items)
 - Shipping cost (with method name)
 - Tax (if applicable)
@@ -95,6 +101,7 @@ Display per item:
 Medusa stores prices as-is (not in cents). Display prices directly without dividing by 100. Example: If backend returns 49.99, display $49.99.
 
 **Example:**
+
 ```
 Subtotal:              $139.97
 Shipping (Express):      $5.99
@@ -123,6 +130,7 @@ Payment method type, last 4 digits (if card), alternative methods (PayPal email,
 Order processing information, shipment timeline, when tracking becomes available, expected delivery date.
 
 **Example:**
+
 ```
 What's Next?
 
@@ -147,6 +155,7 @@ Sets clear expectations, reduces "where's my order" inquiries, builds confidence
 Full-width content, centered on page, all sections stacked vertically. Mobile-friendly by default.
 
 **Section order:**
+
 1. Success message and order number
 2. Email confirmation notice
 3. Order items list
@@ -196,6 +205,7 @@ Extra large (28-36px), highly visible, easy to read and reference, tap to copy (
 Full-width or near full-width (min 90%), 48-56px height (touch-friendly), 16px spacing between buttons.
 
 **Quick actions:**
+
 - Tap phone number to call support
 - Tap to copy order number
 - Add delivery date to calendar

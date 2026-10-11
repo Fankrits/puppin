@@ -11,6 +11,7 @@
     "build": "bun --bun vp build",
     "preview": "bun --bun vp preview",
     "check": "bun --bun vp check",
+    "test": "bun --bun vp test --run",
     "staged": "bun --bun vp staged"
   },
   "dependencies": {

@@ -52,6 +52,7 @@ Popups (modals/overlays) appear over main content to capture attention for speci
 **Purpose**: Convert first-time visitors with discount incentive.
 
 **Content:**
+
 - Headline: "Welcome! Get 10% Off Your First Order"
 - Email input
 - Discount code or automatic application
@@ -66,6 +67,7 @@ Popups (modals/overlays) appear over main content to capture attention for speci
 **Purpose**: Grow email list for marketing.
 
 **Content:**
+
 - Value proposition: "Get exclusive deals and early access"
 - Email input
 - Subscribe button
@@ -82,6 +84,7 @@ Popups (modals/overlays) appear over main content to capture attention for speci
 **Trigger**: Mouse moves toward browser close/back button (desktop only).
 
 **Content:**
+
 - Urgency: "Wait! Don't Miss Out"
 - Offer: "Take 10% Off Your Order" or "Free Shipping Today Only"
 - Email capture (optional): "Send me the code"
@@ -98,6 +101,7 @@ Popups (modals/overlays) appear over main content to capture attention for speci
 **Trigger**: Exit-intent when cart has items but user navigating away.
 
 **Content:**
+
 - "Your Cart is Waiting"
 - Show cart summary (items, total)
 - CTA: "Complete Your Order" or "View Cart"
@@ -110,6 +114,7 @@ Popups (modals/overlays) appear over main content to capture attention for speci
 **Purpose**: Announce sales, new arrivals, or site-wide events.
 
 **Content:**
+
 - Headline: "Flash Sale: 40% Off Everything"
 - Subtext: "Ends in 3 hours"
 - CTA: "Shop Now"
@@ -121,21 +126,25 @@ Popups (modals/overlays) appear over main content to capture attention for speci
 ## Timing and Triggers
 
 **Time-based:**
+
 - 30-60 seconds after page load (enough time to browse)
 - Never immediate (0 seconds) - users need to see site first
 
 **Engagement-based:**
+
 - After 50% scroll (shows interest)
 - After viewing 2-3 products (qualified visitor)
 - After adding to cart (exit-intent only)
 
 **Exit-intent:**
+
 - Mouse moves toward close/back button (desktop)
 - Scroll-up toward address bar (mobile - less reliable)
 - Only trigger once per session
 - Don't trigger on checkout pages (interrupts purchase)
 
 **Page-specific:**
+
 - Homepage: Welcome/discount popup
 - Product pages: Exit-intent with product-specific offer
 - Cart page: Don't use popups (already engaged)
@@ -154,20 +163,22 @@ Popups (modals/overlays) appear over main content to capture attention for speci
 5. **Time cooldown**: If dismissed, wait 30 days before showing again
 
 **Example tracking:**
+
 ```javascript
 // On popup dismiss
-localStorage.setItem('popup_dismissed', Date.now())
-localStorage.setItem('popup_type', 'welcome_discount')
+localStorage.setItem("popup_dismissed", Date.now());
+localStorage.setItem("popup_type", "welcome_discount");
 
 // Before showing popup
-const dismissedTime = localStorage.getItem('popup_dismissed')
-const daysSince = (Date.now() - dismissedTime) / (1000 * 60 * 60 * 24)
+const dismissedTime = localStorage.getItem("popup_dismissed");
+const daysSince = (Date.now() - dismissedTime) / (1000 * 60 * 60 * 24);
 if (daysSince < 30) {
   // Don't show popup
 }
 ```
 
 **Progressive disclosure:**
+
 - Session 1: Welcome discount popup
 - Session 2+: Exit-intent only (if applicable)
 - Never stack multiple popups
@@ -175,6 +186,7 @@ if (daysSince < 30) {
 ## Mobile Considerations
 
 **Mobile popups are MORE intrusive:**
+
 - Smaller screen = popup takes more space
 - Harder to close (small X button)
 - Disrupts mobile browsing flow
@@ -190,6 +202,7 @@ if (daysSince < 30) {
 6. **Google penalty**: Avoid full-screen popups on mobile (hurts rankings)
 
 **Mobile alternative**: Sticky bottom bar (less intrusive)
+
 - "Get 10% Off - Sign Up" with email input
 - Always visible but doesn't block content
 - Better mobile UX than popup

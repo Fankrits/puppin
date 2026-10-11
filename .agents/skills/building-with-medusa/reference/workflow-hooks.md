@@ -8,33 +8,33 @@ Workflow hooks let you inject custom logic into existing Medusa workflows withou
 
 ```typescript
 // src/workflows/hooks/product-created.ts
-import { createProductsWorkflow } from "@medusajs/medusa/core-flows"
-import { StepResponse } from "@medusajs/framework/workflows-sdk"
+import { createProductsWorkflow } from "@medusajs/medusa/core-flows";
+import { StepResponse } from "@medusajs/framework/workflows-sdk";
 
 createProductsWorkflow.hooks.productsCreated(
   // Hook handler
   async ({ products, additional_data }, { container }) => {
     if (!additional_data?.brand_id) {
-      return new StepResponse([], [])
+      return new StepResponse([], []);
     }
 
-    const link = container.resolve("link")
+    const link = container.resolve("link");
 
     // Link products to brand
     const linkData = products.map((product) => ({
       product: { product_id: product.id },
       brand: { brand_id: additional_data.brand_id },
-    }))
+    }));
 
-    await link.create(linkData)
-    return new StepResponse(linkData, linkData)
+    await link.create(linkData);
+    return new StepResponse(linkData, linkData);
   },
   // Compensation (runs if workflow fails after this point)
   async (linkData, { container }) => {
-    const link = container.resolve("link")
-    await link.dismiss(linkData)
-  }
-)
+    const link = container.resolve("link");
+    await link.dismiss(linkData);
+  },
+);
 ```
 
 ## Common Workflow Hooks
@@ -49,26 +49,26 @@ createProductsWorkflow.hooks.productsCreated(
 
 ```typescript
 // src/workflows/hooks/promotion.ts
-import { StepResponse } from "@medusajs/framework/workflows-sdk"
-import { updateCartPromotionsWorkflow } from "@medusajs/medusa/core-flows"
+import { StepResponse } from "@medusajs/framework/workflows-sdk";
+import { updateCartPromotionsWorkflow } from "@medusajs/medusa/core-flows";
 
-updateCartPromotionsWorkflow.hooks.setPromotionContext(
-  ({ cart }, { container }) => {
-    if (cart.items.length >= 2) {
-      return new StepResponse({ company_id: "company_123" })
-    }
+updateCartPromotionsWorkflow.hooks.setPromotionContext(({ cart }, { container }) => {
+  if (cart.items.length >= 2) {
+    return new StepResponse({ company_id: "company_123" });
   }
-)
+});
 ```
 
 ## When to Use Hooks vs Subscribers
 
 **Use workflow hooks when:**
+
 - The logic must complete before the workflow finishes
 - You need rollback/compensation capabilities
 - The operation is critical to the workflow's success
 
 **Use subscribers when:**
+
 - The logic can run asynchronously in the background
 - You don't need to block the main workflow
 - Better performance is needed (hooks are synchronous)

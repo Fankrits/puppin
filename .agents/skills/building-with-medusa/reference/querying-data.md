@@ -3,6 +3,7 @@
 Medusa's Query API (`query.graph()`) is the primary way to retrieve data, especially across modules. It provides a flexible, performant way to query entities with relations and filters.
 
 ## Contents
+
 - [When to Use Query vs Module Services](#when-to-use-query-vs-module-services)
 - [Basic Query Structure](#basic-query-structure)
 - [In Workflows vs Outside Workflows](#in-workflows-vs-outside-workflows)
@@ -19,47 +20,51 @@ Medusa's Query API (`query.graph()`) is the primary way to retrieve data, especi
 ## When to Use Query vs Module Services
 
 **⚠️ USE QUERY FOR**:
+
 - ✅ Retrieving data **across modules** (products with linked brands, orders with customers)
 - ✅ Reading data with linked entities
 - ✅ Complex queries with multiple relations
 - ✅ Storefront and admin data retrieval
 
 **⚠️ USE MODULE SERVICES FOR**:
+
 - ✅ Retrieving data **within a single module** (products with variants - same module)
 - ✅ Using `listAndCount` for pagination within one module
 - ✅ Mutations (always use module services or workflows)
 
 **Examples:**
+
 ```typescript
 // ✅ GOOD: Query for cross-module data
 const { data } = await query.graph({
   entity: "product",
   fields: ["id", "title", "brand.*"], // brand is in different module
-})
+});
 
 // ✅ GOOD: Module service for single module
 const [products, count] = await productService.listAndCountProducts(
   { status: "active" },
-  { take: 10, skip: 0 }
-)
+  { take: 10, skip: 0 },
+);
 ```
 
 ## Basic Query Structure
 
 ```typescript
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
-const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
 
 const { data } = await query.graph({
-  entity: "entity_name",     // The entity to query
-  fields: ["id", "name"],    // Fields to retrieve
+  entity: "entity_name", // The entity to query
+  fields: ["id", "name"], // Fields to retrieve
   filters: { status: "active" }, // Filter conditions
-  pagination: {              // Optional pagination
+  pagination: {
+    // Optional pagination
     take: 10,
     skip: 0,
   },
-})
+});
 ```
 
 ## In Workflows vs Outside Workflows
@@ -67,23 +72,23 @@ const { data } = await query.graph({
 ### Outside Workflows (API Routes, Subscribers, Scheduled Jobs)
 
 ```typescript
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
 // In API routes
-const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
 
 const { data: products } = await query.graph({
   entity: "product",
   fields: ["id", "title"],
-})
+});
 
 // In subscribers/scheduled jobs
-const query = container.resolve(ContainerRegistrationKeys.QUERY)
+const query = container.resolve(ContainerRegistrationKeys.QUERY);
 
 const { data: customers } = await query.graph({
   entity: "customer",
   fields: ["id", "email"],
-})
+});
 ```
 
 ### In Workflows
@@ -91,23 +96,20 @@ const { data: customers } = await query.graph({
 Use `useQueryGraphStep` within workflow composition functions:
 
 ```typescript
-import { createWorkflow, WorkflowResponse } from "@medusajs/framework/workflows-sdk"
-import { useQueryGraphStep } from "@medusajs/medusa/core-flows"
+import { createWorkflow, WorkflowResponse } from "@medusajs/framework/workflows-sdk";
+import { useQueryGraphStep } from "@medusajs/medusa/core-flows";
 
-const myWorkflow = createWorkflow(
-  "my-workflow",
-  function (input) {
-    const { data: products } = useQueryGraphStep({
-      entity: "product",
-      fields: ["id", "title"],
-      filters: {
-        id: input.product_id,
-      },
-    })
+const myWorkflow = createWorkflow("my-workflow", function (input) {
+  const { data: products } = useQueryGraphStep({
+    entity: "product",
+    fields: ["id", "title"],
+    filters: {
+      id: input.product_id,
+    },
+  });
 
-    return new WorkflowResponse({ products })
-  }
-)
+  return new WorkflowResponse({ products });
+});
 ```
 
 ## Field Selection
@@ -118,7 +120,7 @@ const myWorkflow = createWorkflow(
 const { data } = await query.graph({
   entity: "product",
   fields: ["id", "title", "description"],
-})
+});
 ```
 
 ### Nested Relations
@@ -136,7 +138,7 @@ const { data } = await query.graph({
     "category.id",
     "category.name",
   ],
-})
+});
 ```
 
 ### Performance Tip
@@ -145,13 +147,13 @@ const { data } = await query.graph({
 
 ```typescript
 // ❌ BAD: Retrieves all fields (inefficient)
-fields: ["*"]
+fields: ["*"];
 
 // ❌ BAD: Retrieves all product fields (might be many)
-fields: ["product.*"]
+fields: ["product.*"];
 
 // ✅ GOOD: Only retrieves needed fields
-fields: ["id", "title", "product.id", "product.title"]
+fields: ["id", "title", "product.id", "product.title"];
 ```
 
 ## Filtering
@@ -160,7 +162,7 @@ fields: ["id", "title", "product.id", "product.title"]
 
 ```typescript
 filters: {
-  email: "user@example.com"
+  email: "user@example.com";
 }
 ```
 
@@ -168,7 +170,7 @@ filters: {
 
 ```typescript
 filters: {
-  id: ["id1", "id2", "id3"]
+  id: ["id1", "id2", "id3"];
 }
 ```
 
@@ -188,21 +190,21 @@ filters: {
 ```typescript
 filters: {
   name: {
-    $like: "%search%" // Contains "search"
+    $like: "%search%"; // Contains "search"
   }
 }
 
 // Starts with
 filters: {
   name: {
-    $like: "search%"
+    $like: "search%";
   }
 }
 
 // Ends with
 filters: {
   name: {
-    $like: "%search"
+    $like: "%search";
   }
 }
 ```
@@ -212,7 +214,7 @@ filters: {
 ```typescript
 filters: {
   status: {
-    $ne: "deleted"
+    $ne: "deleted";
   }
 }
 ```
@@ -243,10 +245,10 @@ const { data: products } = await query.graph({
   fields: ["id", "title", "variants.*"],
   filters: {
     variants: {
-      sku: "ABC1234" // ✅ Works: variants are in same module as product
-    }
-  }
-})
+      sku: "ABC1234", // ✅ Works: variants are in same module as product
+    },
+  },
+});
 ```
 
 ## Important Filtering Limitation
@@ -267,9 +269,9 @@ const { data: products } = await query.graph({
   entity: "product",
   fields: ["id", "title", "brand.*"],
   filters: {
-    "brand.name": "Nike" // ❌ Cannot filter by linked module field
-  }
-})
+    "brand.name": "Nike", // ❌ Cannot filter by linked module field
+  },
+});
 
 // ❌ THIS ALSO DOES NOT WORK with query.graph()
 const { data: products } = await query.graph({
@@ -277,10 +279,10 @@ const { data: products } = await query.graph({
   fields: ["id", "title", "brand.*"],
   filters: {
     brand: {
-      name: "Nike" // ❌ Still doesn't work - brand is in different module
-    }
-  }
-})
+      name: "Nike", // ❌ Still doesn't work - brand is in different module
+    },
+  },
+});
 ```
 
 ### Solution 1: Use query.index() with Index Module (Recommended)
@@ -294,19 +296,21 @@ const { data: products } = await query.index({
   fields: ["*", "brand.*"],
   filters: {
     brand: {
-      name: "Nike" // ✅ Works with Index Module!
-    }
-  }
-})
+      name: "Nike", // ✅ Works with Index Module!
+    },
+  },
+});
 ```
 
 **Why this is best:**
+
 - Database-level filtering (most efficient)
 - Supports pagination properly
 - Only retrieves the data you need
 - Designed specifically for cross-module filtering
 
 **Requirements:**
+
 - Index Module must be installed and configured
 - Link must have `filterable` properties defined
 - See [Querying Linked Data](#querying-linked-data) section for setup details
@@ -321,15 +325,16 @@ const { data: brands } = await query.graph({
   entity: "brand",
   fields: ["id", "name", "products.*"],
   filters: {
-    name: "Nike" // ✅ Filter on brand directly
-  }
-})
+    name: "Nike", // ✅ Filter on brand directly
+  },
+});
 
 // Access Nike products
-const nikeProducts = brands[0]?.products || []
+const nikeProducts = brands[0]?.products || [];
 ```
 
 **Use this when:**
+
 - You don't have the Index Module set up
 - The "other side" of the link makes sense as the primary entity
 - You need a quick solution without additional setup
@@ -343,19 +348,21 @@ const nikeProducts = brands[0]?.products || []
 const { data: products } = await query.graph({
   entity: "product",
   fields: ["id", "title", "brand.*"],
-})
+});
 
 // Filter in JavaScript after query
-const nikeProducts = products.filter(p => p.brand?.name === "Nike")
+const nikeProducts = products.filter((p) => p.brand?.name === "Nike");
 ```
 
 **Only use this when:**
+
 - Dataset is very small (< 100 records)
 - Index Module is not available
 - Querying from the other side doesn't make sense
 - You need a temporary solution
 
 **Avoid because:**
+
 - Fetches unnecessary data from database
 - Inefficient for large datasets
 - No pagination support at database level
@@ -375,18 +382,18 @@ const { data: products } = await query.graph({
   filters: {
     id: productId,
     reviews: {
-      status: "approved" // ❌ Doesn't work - reviews is linked module
-    }
-  }
-})
+      status: "approved", // ❌ Doesn't work - reviews is linked module
+    },
+  },
+});
 
 // ❌ ALSO WRONG: Filtering in JavaScript is inefficient
 const { data: products } = await query.graph({
   entity: "product",
   fields: ["id", "reviews.*"],
-  filters: { id: productId }
-})
-const approvedReviews = products[0].reviews.filter(r => r.status === "approved") // ❌ Client-side filter
+  filters: { id: productId },
+});
+const approvedReviews = products[0].reviews.filter((r) => r.status === "approved"); // ❌ Client-side filter
 
 // ✅ OPTION 1 (BEST): Use Index Module to filter cross-module
 const { data: products } = await query.index({
@@ -395,10 +402,10 @@ const { data: products } = await query.index({
   filters: {
     id: productId,
     reviews: {
-      status: "approved" // ✅ Works with Index Module!
-    }
-  }
-})
+      status: "approved", // ✅ Works with Index Module!
+    },
+  },
+});
 
 // ✅ OPTION 2 (GOOD): Query reviews directly with filters
 const { data: reviews } = await query.graph({
@@ -406,18 +413,20 @@ const { data: reviews } = await query.graph({
   fields: ["id", "rating", "comment", "product.*"],
   filters: {
     product_id: productId, // Filter by product
-    status: "approved"     // Filter by review status - both in same query!
-  }
-})
+    status: "approved", // Filter by review status - both in same query!
+  },
+});
 ```
 
 **Why Option 1 (Index Module) is best:**
+
 - Database-level filtering across modules
 - Returns data in the structure you expect (product with reviews)
 - Supports pagination properly
 - Only retrieves the data you need
 
 **Why Option 2 (query from other side) is good:**
+
 - No Index Module setup required
 - Still uses database filtering
 - Works well when the "other side" is the logical primary entity
@@ -431,10 +440,10 @@ const { data } = await query.graph({
   fields: ["id", "rating", "product.*"],
   filters: {
     product: {
-      status: "active" // Doesn't work - product is linked module
-    }
-  }
-})
+      status: "active", // Doesn't work - product is linked module
+    },
+  },
+});
 
 // ✅ OPTION 1 (BEST): Use Index Module
 const { data: reviews } = await query.index({
@@ -442,20 +451,20 @@ const { data: reviews } = await query.index({
   fields: ["*", "product.*"],
   filters: {
     product: {
-      status: "active" // ✅ Works with Index Module!
-    }
-  }
-})
+      status: "active", // ✅ Works with Index Module!
+    },
+  },
+});
 
 // ✅ OPTION 2 (GOOD): Query from the other side
 const { data: products } = await query.graph({
   entity: "product",
   fields: ["id", "title", "reviews.*"],
-  filters: { status: "active" }
-})
+  filters: { status: "active" },
+});
 
 // Flatten reviews if needed
-const reviews = products.flatMap(p => p.reviews)
+const reviews = products.flatMap((p) => p.reviews);
 ```
 
 #### Example: Products with Variants (Same Module - Works!)
@@ -469,11 +478,11 @@ const { data: products } = await query.graph({
   filters: {
     variants: {
       inventory_quantity: {
-        $gte: 10 // ✅ Works: both in Product Module
-      }
-    }
-  }
-})
+        $gte: 10, // ✅ Works: both in Product Module
+      },
+    },
+  },
+});
 ```
 
 ## Pagination
@@ -485,13 +494,13 @@ const { data, metadata } = await query.graph({
   entity: "product",
   fields: ["id", "title"],
   pagination: {
-    skip: 0,   // Offset
-    take: 10,  // Limit
+    skip: 0, // Offset
+    take: 10, // Limit
   },
-})
+});
 
 // metadata.count contains total count
-console.log(`Total: ${metadata.count}`)
+console.log(`Total: ${metadata.count}`);
 ```
 
 ### With Ordering
@@ -507,7 +516,7 @@ const { data } = await query.graph({
       created_at: "DESC", // Newest first
     },
   },
-})
+});
 ```
 
 ### Multiple Order Fields
@@ -528,11 +537,13 @@ When entities are linked via [module links](module-links.md), you have two optio
 ### Option 1: query.graph() - Retrieve Linked Data Without Cross-Module Filters
 
 **Use `query.graph()` when:**
+
 - ✅ Retrieving linked data without filtering by linked module properties
 - ✅ Filtering only by properties in the primary entity's module
 - ✅ You want to include related data in the response
 
 **Limitations:**
+
 - ❌ **CANNOT filter by properties of linked modules** (data models in separate modules)
 - ✅ **CAN filter by properties of relations in the same module** (e.g., product.variants)
 
@@ -548,10 +559,10 @@ const { data: products } = await query.graph({
   filters: {
     id: "prod_123", // ✅ Filter by product property (same module)
   },
-})
+});
 
 // Access linked data
-console.log(products[0].brand.name)
+console.log(products[0].brand.name);
 
 // ✅ WORKS: Filter by same-module relation (product and variants are in Product Module)
 const { data: products } = await query.graph({
@@ -559,10 +570,10 @@ const { data: products } = await query.graph({
   fields: ["id", "title", "variants.*"],
   filters: {
     variants: {
-      sku: "ABC1234" // ✅ Works: variants are in same module as product
-    }
-  }
-})
+      sku: "ABC1234", // ✅ Works: variants are in same module as product
+    },
+  },
+});
 
 // ❌ DOES NOT WORK: Cannot filter products by linked brand name
 const { data: products } = await query.graph({
@@ -570,10 +581,10 @@ const { data: products } = await query.graph({
   fields: ["id", "title", "brand.*"],
   filters: {
     brand: {
-      name: "Nike" // ❌ Fails: brand is in a different module
-    }
-  }
-})
+      name: "Nike", // ❌ Fails: brand is in a different module
+    },
+  },
+});
 ```
 
 **Reverse Query (From Link to Original):**
@@ -587,22 +598,24 @@ const { data: brands } = await query.graph({
     "name",
     "products.*", // All linked products
   ],
-})
+});
 
 // Access linked products
-brands[0].products.forEach(product => {
-  console.log(product.title)
-})
+brands[0].products.forEach((product) => {
+  console.log(product.title);
+});
 ```
 
 ### Option 2: query.index() - Filter Across Linked Modules (Index Module)
 
 **Use `query.index()` when:**
+
 - ✅ You need to filter data by properties of linked modules (separate modules with module links)
 - ✅ Filtering by custom data model properties linked to Commerce Module entities
 - ✅ Complex cross-module queries requiring efficient database-level filtering
 
 **Key Distinction:**
+
 - **Same module relations** (e.g., Product → ProductVariant): Use `query.graph()` ✅
 - **Different module links** (e.g., Product → Brand, Product → Review): Use `query.index()` ✅
 
@@ -611,6 +624,7 @@ brands[0].products.forEach(product => {
 The Index Module solves the fundamental limitation of `query.graph()`: **you cannot filter one module's data by another module's linked properties** using `query.graph()`.
 
 Examples of when you need `query.index()`:
+
 - Filter products by brand name (Product Module → Brand Module)
 - Filter products by review ratings (Product Module → Review Module)
 - Filter customers by custom loyalty tier (Customer Module → Loyalty Module)
@@ -621,11 +635,13 @@ Examples of when you need `query.index()`:
 Before using `query.index()`, ensure the Index Module is configured:
 
 1. **Install the Index Module:**
+
    ```bash
    npm install @medusajs/index
    ```
 
 2. **Add to `medusa-config.ts`:**
+
    ```typescript
    module.exports = defineConfig({
      modules: [
@@ -633,26 +649,29 @@ Before using `query.index()`, ensure the Index Module is configured:
          resolve: "@medusajs/index",
        },
      ],
-   })
+   });
    ```
 
 3. **Enable the feature flag in `.env`:**
+
    ```bash
    MEDUSA_FF_INDEX_ENGINE=true
    ```
 
 4. **Run migrations:**
+
    ```bash
    npx medusa db:migrate
    ```
 
 5. **Mark linked properties as filterable** in your link definition:
+
    ```typescript
    // src/links/product-brand.ts
    defineLink(
      { linkable: ProductModule.linkable.product, isList: true },
-     { linkable: BrandModule.linkable.brand, filterable: ["id", "name"] }
-   )
+     { linkable: BrandModule.linkable.brand, filterable: ["id", "name"] },
+   );
    ```
 
    The `filterable` property marks which fields can be queried across modules.
@@ -662,9 +681,9 @@ Before using `query.index()`, ensure the Index Module is configured:
 #### Using query.index()
 
 ```typescript
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
-const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
 
 // ✅ CORRECT: Filter products by linked brand name using Index Module
 const { data: products } = await query.index({
@@ -675,7 +694,7 @@ const { data: products } = await query.index({
       name: "Nike", // ✅ Works with Index Module!
     },
   },
-})
+});
 
 // ✅ CORRECT: Filter products by review ratings
 const { data: products } = await query.index({
@@ -688,12 +707,13 @@ const { data: products } = await query.index({
       },
     },
   },
-})
+});
 ```
 
 #### query.index() Features
 
 **Pagination:**
+
 ```typescript
 const { data: products } = await query.index({
   entity: "product",
@@ -705,10 +725,11 @@ const { data: products } = await query.index({
     take: 20,
     skip: 0,
   },
-})
+});
 ```
 
 **Advanced Filters:**
+
 ```typescript
 const { data: products } = await query.index({
   entity: "product",
@@ -723,7 +744,7 @@ const { data: products } = await query.index({
       $ne: "deleted", // Not equal
     },
   },
-})
+});
 ```
 
 #### query.graph() vs query.index() Decision Tree
@@ -754,23 +775,26 @@ Need to filter by linked module properties?
 Use `throwIfKeyNotFound` to validate that a record exists before performing operations:
 
 ```typescript
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
 // Outside workflows
-const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
 
-const { data } = await query.graph({
-  entity: "product",
-  fields: ["id", "title"],
-  filters: {
-    id: productId,
+const { data } = await query.graph(
+  {
+    entity: "product",
+    fields: ["id", "title"],
+    filters: {
+      id: productId,
+    },
   },
-}, {
-  throwIfKeyNotFound: true, // Throws if product doesn't exist
-})
+  {
+    throwIfKeyNotFound: true, // Throws if product doesn't exist
+  },
+);
 
 // If we get here, product exists
-const product = data[0]
+const product = data[0];
 ```
 
 ```typescript
@@ -784,26 +808,24 @@ const { data: products } = useQueryGraphStep({
   options: {
     throwIfKeyNotFound: true, // Throws if product doesn't exist
   },
-})
+});
 ```
 
 **When to use:**
+
 - ✅ Before updating or deleting a record
 - ✅ When the record MUST exist for the operation to continue
 - ✅ To avoid manual existence checks
 
 ```typescript
 // ❌ BAD: Manual check
-const { data } = await query.graph({ /* ... */ })
+const { data } = await query.graph({/* ... */});
 if (!data || data.length === 0) {
-  throw new MedusaError(MedusaError.Types.NOT_FOUND, "Product not found")
+  throw new MedusaError(MedusaError.Types.NOT_FOUND, "Product not found");
 }
 
 // ✅ GOOD: Let query handle it
-const { data } = await query.graph(
-  { /* ... */ },
-  { throwIfKeyNotFound: true }
-)
+const { data } = await query.graph({/* ... */}, { throwIfKeyNotFound: true });
 ```
 
 ## Performance Best Practices
@@ -814,10 +836,10 @@ const { data } = await query.graph(
 
 ```typescript
 // ❌ BAD: Retrieves everything (slow, wasteful)
-fields: ["*"]
+fields: ["*"];
 
 // ✅ GOOD: Only needed fields (fast)
-fields: ["id", "title", "price"]
+fields: ["id", "title", "price"];
 ```
 
 ### 2. Limit Relation Depth
@@ -833,7 +855,7 @@ fields: [
   "variants.product.*", // Circular, unnecessary
   "variants.prices.*",
   "variants.prices.currency.*", // Probably don't need all currency fields
-]
+];
 
 // ✅ GOOD: Appropriate depth
 fields: [
@@ -843,7 +865,7 @@ fields: [
   "variants.sku",
   "variants.prices.amount",
   "variants.prices.currency_code",
-]
+];
 ```
 
 ### 3. Use Pagination for Large Result Sets
@@ -857,7 +879,7 @@ const { data, metadata } = await query.graph({
     take: 50, // Don't retrieve thousands of records at once
     skip: 0,
   },
-})
+});
 ```
 
 ### 4. Filter Early
@@ -875,7 +897,7 @@ const { data } = await query.graph({
       $gte: lastWeek,
     },
   },
-})
+});
 ```
 
 ### 5. Use Specific Queries for Different Use Cases
@@ -885,7 +907,7 @@ const { data } = await query.graph({
 const { data: listings } = await query.graph({
   entity: "product",
   fields: ["id", "title", "thumbnail", "price"],
-})
+});
 
 // ✅ For detail pages (more fields)
 const { data: details } = await query.graph({
@@ -900,7 +922,7 @@ const { data: details } = await query.graph({
     "variants.prices.*",
   ],
   filters: { id: productId },
-})
+});
 ```
 
 ## Common Patterns
@@ -908,15 +930,15 @@ const { data: details } = await query.graph({
 ### Pattern: List with Search
 
 ```typescript
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
-  const { q } = req.validatedQuery
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+  const { q } = req.validatedQuery;
 
-  const filters: any = {}
+  const filters: any = {};
   if (q) {
-    filters.title = { $like: `%${q}%` }
+    filters.title = { $like: `%${q}%` };
   }
 
   const { data: products } = await query.graph({
@@ -924,53 +946,49 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     fields: ["id", "title", "thumbnail"],
     filters,
     ...req.queryConfig, // Uses request query config
-  })
+  });
 
-  return res.json({ products })
+  return res.json({ products });
 }
 ```
 
 ### Pattern: Retrieve with Validation
 
 ```typescript
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
-  const { id } = req.params
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+  const { id } = req.params;
 
   // Throws 404 if product doesn't exist
-  const { data } = await query.graph({
-    entity: "product",
-    fields: ["id", "title", "description", "variants.*"],
-    filters: { id },
-  }, {
-    throwIfKeyNotFound: true,
-  })
+  const { data } = await query.graph(
+    {
+      entity: "product",
+      fields: ["id", "title", "description", "variants.*"],
+      filters: { id },
+    },
+    {
+      throwIfKeyNotFound: true,
+    },
+  );
 
-  return res.json({ product: data[0] })
+  return res.json({ product: data[0] });
 }
 ```
 
 ### Pattern: Query with Relations and Filters
 
 ```typescript
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
-  const { category_id } = req.validatedQuery
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+  const { category_id } = req.validatedQuery;
 
   const { data: products } = await query.graph({
     entity: "product",
-    fields: [
-      "id",
-      "title",
-      "thumbnail",
-      "variants.id",
-      "variants.prices.amount",
-      "category.name",
-    ],
+    fields: ["id", "title", "thumbnail", "variants.id", "variants.prices.amount", "category.name"],
     filters: {
       category_id,
       status: "published",
@@ -979,19 +997,19 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       take: 20,
       skip: 0,
     },
-  })
+  });
 
-  return res.json({ products })
+  return res.json({ products });
 }
 ```
 
 ### Pattern: Count Records
 
 ```typescript
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
 
   const { data, metadata } = await query.graph({
     entity: "product",
@@ -999,21 +1017,21 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     filters: {
       status: "published",
     },
-  })
+  });
 
   return res.json({
     count: metadata.count,
-  })
+  });
 }
 ```
 
 ### Pattern: Recent Items
 
 ```typescript
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
 
   const { data: recentProducts } = await query.graph({
     entity: "product",
@@ -1025,8 +1043,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         created_at: "DESC", // Newest first
       },
     },
-  })
+  });
 
-  return res.json({ products: recentProducts })
+  return res.json({ products: recentProducts });
 }
 ```

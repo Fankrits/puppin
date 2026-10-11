@@ -34,12 +34,9 @@ type PricedVariant = {
 } | null;
 
 /** A product's priced variants per currency, as `loadPricing` reads them. */
-export type ProductPricingRows = Partial<
-  Record<PriceCurrency, PricedVariant[] | null>
->;
+export type ProductPricingRows = Partial<Record<PriceCurrency, PricedVariant[] | null>>;
 
-type PriceFieldName =
-  `${"min_price" | "max_price" | "original_price"}_${PriceCurrency}`;
+type PriceFieldName = `${"min_price" | "max_price" | "original_price"}_${PriceCurrency}`;
 type OnSaleFieldName = `on_sale_${PriceCurrency}`;
 
 export type ProductPricing = { [K in PriceFieldName]?: number | null } & {
@@ -72,10 +69,7 @@ export const priceFields = Object.fromEntries(
         .retrievable(),
     ],
     [`original_price_${currency}`, search.float().retrievable()],
-    [
-      `on_sale_${currency}`,
-      search.boolean().filterable().facetable().retrievable(),
-    ],
+    [`on_sale_${currency}`, search.boolean().filterable().facetable().retrievable()],
   ]),
 ) as PriceFields;
 
@@ -102,9 +96,7 @@ function toPricing(
     }
 
     const original =
-      typeof price?.original_amount === "number"
-        ? price.original_amount
-        : calculated;
+      typeof price?.original_amount === "number" ? price.original_amount : calculated;
 
     if (maxPrice === undefined || calculated > maxPrice) {
       maxPrice = calculated;
@@ -130,14 +122,10 @@ function toPricing(
 }
 
 /** Every currency's price fields for one product. */
-export function toProductPricing(
-  pricingRows: ProductPricingRows | undefined,
-): ProductPricing {
+export function toProductPricing(pricingRows: ProductPricingRows | undefined): ProductPricing {
   return Object.assign(
     {},
-    ...PRICE_CURRENCIES.map((currency) =>
-      toPricing(currency, pricingRows?.[currency]),
-    ),
+    ...PRICE_CURRENCIES.map((currency) => toPricing(currency, pricingRows?.[currency])),
   );
 }
 

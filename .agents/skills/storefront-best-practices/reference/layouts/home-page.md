@@ -35,12 +35,14 @@ All content (categories, products, promotions) must be fetched from the ecommerc
 ### Must-Have Sections
 
 **Critical for every homepage:**
+
 1. Hero section (above the fold)
 2. Category navigation (product discovery)
 3. Featured/bestselling products (social proof)
 4. Footer (contact, legal, navigation)
 
 **Strongly recommended:**
+
 1. Value propositions (free shipping, returns, etc.)
 2. Social proof (reviews, testimonials, trust badges)
 3. New arrivals or sale section
@@ -49,17 +51,20 @@ All content (categories, products, promotions) must be fetched from the ecommerc
 ### Content Hierarchy Decision
 
 **Above the fold (first screen):**
+
 - Hero section with main message
 - Primary call-to-action
 - Key value propositions (optional)
 
 **Middle sections:**
+
 - Featured categories
 - Product sections (bestsellers, new arrivals, sale)
 - Promotional banners
 - Social proof
 
 **Bottom sections:**
+
 - Newsletter signup
 - Footer
 
@@ -68,6 +73,7 @@ All content (categories, products, promotions) must be fetched from the ecommerc
 Large banner at top of homepage, first thing users see (above the fold). Communicates main message or promotion.
 
 **Content options:**
+
 - Seasonal campaign or sale
 - New product arrivals
 - Brand message or value proposition
@@ -83,6 +89,7 @@ Large banner at top of homepage, first thing users see (above the fold). Communi
 **Purpose**: Help users browse by category, reduce clicks to reach products, quick access to main product types.
 
 **Category selection:**
+
 - 4-8 main categories
 - Most popular or seasonal categories
 - Balanced representation
@@ -106,6 +113,7 @@ Horizontal scrollable categories showing 4-6 at once. Arrows for navigation. See
 **Purpose**: Showcase popular products, build social proof, guide uncertain shoppers.
 
 **Product selection (backend-driven):**
+
 - Sort by total sales volume
 - Update regularly (weekly or monthly)
 - Mix of categories (not all one type)
@@ -119,6 +127,7 @@ Product slider or grid, product cards with image, title, price, rating (if avail
 **Purpose**: Highlight latest products, create sense of freshness, encourage repeat visits.
 
 **Product selection:**
+
 - Most recently added products (last 30 days)
 - Sorted by newest first
 - Exclude out-of-stock items
@@ -132,6 +141,7 @@ Product slider, optional "New" badge on products. "Shop New Arrivals" link.
 **Purpose**: Drive urgency and conversions, clear excess inventory.
 
 **Product selection:**
+
 - Products with active sale prices from backend
 - Sorted by discount percentage
 - Limited time or seasonal sales
@@ -146,6 +156,7 @@ Product slider with sale badges, strikethrough pricing, optional countdown timer
 **Purpose**: Build trust quickly, address common concerns (shipping cost, returns), differentiate from competitors.
 
 **Common value propositions:**
+
 - Free shipping (over threshold or always)
 - Free returns (30/60/90 days)
 - Secure checkout
@@ -168,12 +179,14 @@ Below hero section (most common) or above footer.
 **⚠️ IMPORTANT: Check footer first - don't duplicate newsletter forms.**
 
 If your footer already includes a newsletter signup form, **do NOT add another newsletter section on the homepage**. Two newsletter forms on the same page:
+
 - Creates confusion (which one to use?)
 - Looks unprofessional and repetitive
 - Reduces conversion (decision fatigue)
 - Wastes valuable homepage space
 
 **Decision:**
+
 - Footer has newsletter? → Skip homepage newsletter section, use that space for other content
 - Footer doesn't have newsletter? → Add homepage newsletter section (recommended placement: mid-page)
 - Want both? → Only if they serve different purposes (e.g., footer = general newsletter, homepage = specific campaign/offer)
@@ -181,6 +194,7 @@ If your footer already includes a newsletter signup form, **do NOT add another n
 **Purpose**: Grow email list for marketing, offer incentive to build relationship.
 
 **Design essentials:**
+
 - Heading: "Stay in the Loop", "Get 10% Off"
 - Subheading: Benefit of subscribing (don't just say "subscribe")
 - Email input field
@@ -188,12 +202,14 @@ If your footer already includes a newsletter signup form, **do NOT add another n
 - Privacy note (optional): "We respect your privacy"
 
 **Incentive (CRITICAL):**
+
 - 10% off first order (most common)
 - Early access to sales
 - Exclusive content or products
 - Free shipping code
 
 **Layout options:**
+
 - Full-width section (dedicated section, background color, centered)
 - Inline form (between sections, smaller)
 - Footer newsletter (part of footer) - see footer.md
@@ -206,6 +222,7 @@ Mid-page (after 2-3 sections) or above footer.
 ### Section Order Recommendation
 
 **Typical homepage structure:**
+
 1. Hero section
 2. Value propositions (free shipping, returns)
 3. Featured categories

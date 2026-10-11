@@ -29,12 +29,14 @@ Over 60% of ecommerce traffic is mobile. Mobile-first design is essential for co
 ### Sticky Elements (Critical for Conversion)
 
 **Cart access always visible:**
+
 - Sticky header with cart icon (top-right)
 - Or: Sticky bottom navigation with cart
 - Never hide cart in hamburger drawer
 - Shows count badge, updates in real-time
 
 **Sticky "Add to Cart" bar (product pages):**
+
 - Fixed at bottom of screen
 - Shows: Price + "Add to Cart" button
 - Appears after scrolling past fold
@@ -45,17 +47,20 @@ Over 60% of ecommerce traffic is mobile. Mobile-first design is essential for co
 ### Mobile Navigation Patterns
 
 **Bottom navigation (optional pattern):**
+
 - Consider for mobile-heavy stores (>70% mobile traffic)
 - 4-5 primary actions: Home, Categories, Cart, Account, Search
 - Fixed at bottom (easier thumb access)
 - Icons + labels for clarity
 
 **When to use:**
+
 - Mobile-first brands (fashion, beauty)
 - Younger demographic (18-34)
 - App-like experience desired
 
 **When NOT to use:**
+
 - Desktop-heavy traffic
 - Complex navigation needs (>5 items)
 - B2B stores (desktop-focused)
@@ -63,12 +68,14 @@ Over 60% of ecommerce traffic is mobile. Mobile-first design is essential for co
 ### Mobile Product Browsing
 
 **Image galleries:**
+
 - Full-width swipeable carousel
 - Pinch to zoom
 - Tap to open full-screen view
 - Dot indicators (1/5, 2/5)
 
 **Filter drawer:**
+
 - "Filters" button with badge count (e.g., "Filters (3)")
 - Slide-out drawer (full-screen or 80% width)
 - Accordion sections for filter categories
@@ -76,6 +83,7 @@ Over 60% of ecommerce traffic is mobile. Mobile-first design is essential for co
 - "Clear All" option at top
 
 **Why batch filtering on mobile:**
+
 - Prevents multiple re-renders on slow connections
 - User adjusts multiple filters before applying
 - Less disruptive mobile UX
@@ -83,17 +91,20 @@ Over 60% of ecommerce traffic is mobile. Mobile-first design is essential for co
 ### Mobile Checkout Optimization
 
 **Digital wallets priority (CRITICAL for mobile conversion):**
+
 - Apple Pay / Google Pay buttons prominent at top (if supported in ecommerce backend)
 - Can improve mobile checkout conversion by 20-40%
 - One-click payment with pre-filled shipping addresses (if supported in ecommerce backend)
 - Consider making digital wallet the default on mobile
 
 **Decision: Order summary placement**
+
 - Collapsible at top (recommended): Saves screen space for form, expandable for review
 - Fixed at bottom: Always visible but takes space from form
 - Use collapsible on mobile to prioritize form completion
 
 **Form optimizations:**
+
 - Single-column layout (never multi-column on mobile)
 - 44-48px input height minimum
 - Proper keyboard types (`inputMode="email"`, `"numeric"`, `"tel"`)
@@ -103,17 +114,20 @@ Over 60% of ecommerce traffic is mobile. Mobile-first design is essential for co
 ## Touch-Friendly Interactions
 
 **Standard touch targets:** 44x44px minimum for all interactive elements. Pay special attention to:
+
 - Filter checkboxes on product listings
 - Quantity +/- buttons on product pages
 - Small action buttons on product cards
 - Modal close buttons
 
 **Swipe gestures for ecommerce:**
+
 - Product image galleries (critical - users expect swipeable images)
 - Related product sliders
 - Category carousels
 
 **Mobile input optimization:**
+
 - 16px minimum font size for inputs (prevents iOS auto-zoom)
 - Proper `inputMode` attributes: `"email"`, `"numeric"`, `"tel"`
 - Autocomplete attributes: `autocomplete="email"`, `"name"`, `"address-line1"`
@@ -127,6 +141,7 @@ Over 60% of ecommerce traffic is mobile. Mobile-first design is essential for co
 3. **Skeleton screens**: Show loading placeholders for product grids, not blank pages
 
 **Critical mobile performance issues:**
+
 - Unoptimized product images (>1MB) - most common issue
 - Loading entire product catalog at once - use pagination or infinite scroll
 - Heavy analytics scripts on checkout - defer to post-purchase
@@ -136,6 +151,7 @@ Over 60% of ecommerce traffic is mobile. Mobile-first design is essential for co
 ## Safe Area Insets (iOS)
 
 Use `env(safe-area-inset-*)` to handle iOS notches and rounded corners on:
+
 - Sticky headers (top inset)
 - Sticky bottom navigation or add-to-cart bars (bottom inset)
 - Full-screen modals

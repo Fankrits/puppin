@@ -34,6 +34,7 @@ The cart page displays all items a customer has added to their shopping cart. Pu
 ### Two-Column Pattern (Desktop)
 
 **Most common:**
+
 - Left column (60-70%): Cart items list
 - Right column (30-40%): Order summary (sticky)
 - Below items: Promo code input, continue shopping
@@ -42,6 +43,7 @@ The cart page displays all items a customer has added to their shopping cart. Pu
 ### Mobile Layout
 
 Single column (stacked):
+
 - Cart items
 - Order summary
 - Promo code input
@@ -57,6 +59,7 @@ Single column (stacked):
 Products with variants (size, color, material, style, etc.) must show the selected variant options. Without this, customers can't confirm they have the correct items in their cart.
 
 **Essential information per item:**
+
 - Product image (thumbnail, 80-120px desktop, 60-80px mobile)
 - Product title (linked to product page)
 - **Variant details (REQUIRED)**: Size, color, material, or other variant options selected
@@ -72,6 +75,7 @@ Products with variants (size, color, material, style, etc.) must show the select
 Horizontal card (image left, details right), clear visual separation between items, adequate spacing (16-24px).
 
 **Why variant details are critical:**
+
 - Customer confirmation before checkout
 - Prevents returns from wrong variant purchases
 - Allows easy correction if wrong variant in cart
@@ -93,11 +97,13 @@ Total for item (price × quantity), bold or larger font, update dynamically when
 ### Quantity Selector
 
 Standard +/- buttons with number display:
+
 ```
 [-]  [2]  [+]
 ```
 
 **Behavior:**
+
 - Min: 1 (can't go below, or remove item instead)
 - Max: Stock available or cart limit
 - Manual input allowed (type number)
@@ -121,6 +127,7 @@ Position: Right column on desktop (sticky), below cart items on mobile, fixed wi
 ### Price Breakdown
 
 **Line items:**
+
 ```
 Subtotal (3 items):     $149.97
 Shipping:               $9.99
@@ -144,6 +151,7 @@ Grand total (bold, larger font), most prominent number.
 ### Savings Display
 
 If discounts applied:
+
 - Show total savings: "You saved $20.00" (green text)
 - Or: Discount line item in breakdown
 - Positive reinforcement
@@ -164,12 +172,14 @@ On submit (codes usually uppercase).
 ### Success and Error States
 
 **Success:**
+
 - Green checkmark or success message: "Code applied: WELCOME10"
 - Discount shown in order summary: "Discount (WELCOME10) -$10.00"
 - Remove option: X icon or "Remove" link
 - Update cart total immediately
 
 **Error:**
+
 - Red error message below input: "Invalid code", "Code expired", or "Minimum purchase not met"
 - Input remains visible for retry
 - Don't clear input field
@@ -197,6 +207,7 @@ Lock icon with "Secure Checkout", payment badges (Visa, Mastercard, PayPal), "SS
 ### Display
 
 When cart is empty:
+
 - Centered content
 - Icon or illustration (empty shopping bag)
 - Heading: "Your cart is empty"
@@ -204,6 +215,7 @@ When cart is empty:
 - CTA button: "Continue Shopping" or "Browse Products"
 
 **Additional elements:**
+
 - Link to popular categories
 - Recently viewed products (if available)
 - Bestsellers or featured products
@@ -216,6 +228,7 @@ When cart is empty:
 Cart stored in backend (persistent), fetch on page load, sync with backend on changes.
 
 **When to fetch:**
+
 - Page load (initial cart data)
 - After adding/updating/removing items
 - After applying promo codes
@@ -226,8 +239,9 @@ Cart stored in backend (persistent), fetch on page load, sync with backend on ch
 Store cart data in global state (React Context), keep cart ID in localStorage, update state after API responses, share cart state across components (page, popup, header badge).
 
 **Cart ID persistence:**
+
 ```javascript
-localStorage.setItem('cart_id', cartId)
+localStorage.setItem("cart_id", cartId);
 ```
 
 Send cart ID with every cart API request, create new cart if ID doesn't exist, clear cart ID on checkout completion.
@@ -247,6 +261,7 @@ Use `useQuery` for fetching cart data, set `staleTime` to 30-60 seconds, use `qu
 ### Medusa Integration
 
 Use `@medusajs/medusa-js` SDK:
+
 - Cart endpoints: `/store/carts`, `/store/carts/{id}`
 - Add to cart: POST `/store/carts/{id}/line-items`
 - Update quantity: POST `/store/carts/{id}/line-items/{lineId}`
@@ -275,6 +290,7 @@ Smaller product images (60-80px), truncated product titles (1-2 lines), essentia
 Fixed at bottom of screen, total amount visible, "Checkout" button (full-width), appears after scrolling (optional), always accessible.
 
 **Design:**
+
 ```
 [Total: $171.96]  [Checkout]
 ```

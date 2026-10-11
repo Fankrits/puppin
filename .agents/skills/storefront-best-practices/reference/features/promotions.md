@@ -32,6 +32,7 @@ All promotion logic and data must come from the ecommerce backend. Do this based
 ### Purpose
 
 **Conversion optimization:**
+
 - Drive sales and increase conversion rate
 - Increase average order value (free shipping thresholds, tiered discounts)
 - Acquire new customers (first-order discounts)
@@ -46,12 +47,14 @@ All promotion logic and data must come from the ecommerce backend. Do this based
 **What it is**: Select products with reduced prices, automatically applied. No code needed.
 
 **Use when:**
+
 - Seasonal sales (Black Friday, holiday sales)
 - Clearance or end-of-season inventory
 - Product-specific promotions
 - You want reduced prices visible on product pages (increases click-through)
 
 **Display:**
+
 - Strikethrough original price (provides context for savings)
 - Sale price bold and prominent (red or brand color)
 - Sale badge on product cards ("Sale", "30% Off")
@@ -64,6 +67,7 @@ Use Price Lists with special prices for products. Provides automatic strikethrou
 **What it is**: Customer enters code to unlock discount (percentage, fixed amount, or free shipping).
 
 **Use when:**
+
 - Newsletter signups ("Get 10% off with WELCOME10")
 - VIP or loyalty program members (exclusive codes)
 - Targeted marketing campaigns (email, social media)
@@ -71,6 +75,7 @@ Use Price Lists with special prices for products. Provides automatic strikethrou
 - Friends and family discounts (limited distribution)
 
 **Display:**
+
 - Promo code input field in cart/checkout
 - Success message: "Code applied: WELCOME10"
 - Discount shown in order summary with code name
@@ -84,12 +89,14 @@ Discount/promo code system with advanced logic (order-level discounts, usage lim
 **What it is**: Discount automatically applied when conditions met. No code entry required.
 
 **Use when:**
+
 - Free shipping thresholds ("Free shipping over $50")
 - Volume discounts ("Spend $100, get $20 off")
 - Buy One Get One (BOGO) offers
 - Encouraging larger cart values (increase AOV)
 
 **Display:**
+
 - Banner announcing the promotion
 - Progress indicator toward threshold (see Free Shipping Threshold section)
 - "Discount applied" message in cart
@@ -100,11 +107,13 @@ Discount/promo code system with advanced logic (order-level discounts, usage lim
 **What it is**: Purchase certain products to unlock free/discounted items.
 
 **Use when:**
+
 - Moving inventory (clear out slow-moving products)
 - Cross-selling related products ("Buy sunscreen, get beach bag 50% off")
 - Increasing units per transaction
 
 **Display:**
+
 - Clear promotion text on product page ("Buy 2, Get 1 Free")
 - Free/discounted item shown in cart with explanation
 - Discount line in order summary
@@ -117,17 +126,20 @@ Buy X Get Y automatic discount. Free/discounted item must be added to cart to ac
 ### Strikethrough Pricing Pattern
 
 **Format:**
+
 ```
 $49.99  $34.99
 (Original, strikethrough)  (Sale price, bold)
 ```
 
 **Design:**
+
 - Original price: Strikethrough, muted gray color, smaller
 - Sale price: Bold, larger, red or accent color
 - Clear visual hierarchy (sale price dominates)
 
 **Placement:**
+
 - Product cards: Below image
 - Product page: Near "Add to Cart" button
 - Cart: Item price column
@@ -137,11 +149,13 @@ $49.99  $34.99
 Show savings to emphasize value.
 
 **Options:**
+
 - "Save 30%" badge
 - "30% off" label
 - "$15 off" (absolute savings)
 
 **Placement:**
+
 - Badge on product image (top-left or top-right corner)
 - Near price (inline or below)
 - In cart summary ("Total savings: $45")
@@ -158,6 +172,7 @@ Bright badge on product image (red, orange, yellow) in top corner. 48-64px deskt
 Cart page order summary or checkout page. Position in right sidebar (desktop) or below items (mobile).
 
 **Layout:**
+
 - Label: "Promo code" or "Discount code"
 - Text input (200-280px desktop, full-width mobile)
 - "Apply" button inline or stacked (mobile)
@@ -169,17 +184,20 @@ Cart page order summary or checkout page. Position in right sidebar (desktop) or
 ### Success and Error States
 
 **Success:**
+
 - Green checkmark or success message: "Code applied: WELCOME10"
 - Discount shown in order summary with code name: "Discount (WELCOME10) -$10.00"
 - Remove option: X icon or "Remove" link
 - Update cart total immediately
 
 **Error:**
+
 - Red error message below input: "Invalid code", "Code expired", or "Minimum purchase not met"
 - Input remains visible for retry
 - Don't clear input field (user may have typo)
 
 **Applied code display in order summary:**
+
 ```
 Subtotal              $100.00
 Discount (WELCOME10)  -$10.00
@@ -195,23 +213,27 @@ Total                 $95.00
 ### Progress Bar Pattern
 
 **Display in cart:**
+
 - "Add $25 more for FREE SHIPPING"
 - Horizontal progress bar showing proximity to threshold
 - Updates automatically as cart value changes
 - Green when threshold reached
 
 **Example:**
+
 ```
 Add $25.00 more for FREE SHIPPING
 [███████░░░░░░░░] 50%
 ```
 
 **When threshold met:**
+
 - "You've unlocked free shipping!" (success message)
 - Green checkmark or badge
 - Crossed-out shipping charge in order summary
 
 **Why it works:**
+
 - Visualizes proximity to goal (loss aversion)
 - Increases AOV by 15-30% on average
 - Reduces cart abandonment (free shipping is top reason to complete purchase)
@@ -227,6 +249,7 @@ Sitewide announcement: "Free shipping on orders over $50". Display in top banner
 Full-width strip at top of page (48-64px height). Bright color contrasting with navbar. Short message: "Free shipping on orders over $50" or "Sale: Up to 50% off - Shop Now".
 
 **Position:**
+
 - Above navbar (most common)
 - Below navbar (alternative)
 - Sticky (stays visible on scroll, optional)
@@ -247,12 +270,14 @@ Within page content (product pages, cart). Examples: Free shipping reminder on c
 Use for time-sensitive promotions to create urgency and FOMO.
 
 **When to use:**
+
 - Flash sales (24-hour sales)
 - Limited-time offers
 - Holiday promotions
 - Never for permanent sales (fake urgency harms trust)
 
 **Display format:**
+
 - "Sale ends in: 2d 14h 32m 15s"
 - Or simpler: "Ends in 2 days"
 - Or: "Hurry! Only 14 hours left"

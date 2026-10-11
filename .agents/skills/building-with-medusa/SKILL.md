@@ -10,6 +10,7 @@ Comprehensive backend development guide for Medusa applications. Contains patter
 ## When to Apply
 
 **Load this skill for ANY backend development task, including:**
+
 - Creating or modifying custom modules and data models
 - Implementing workflows for mutations
 - Building API routes (store or admin)
@@ -19,6 +20,7 @@ Comprehensive backend development guide for Medusa applications. Contains patter
 - Implementing authentication/authorization
 
 **Also load these skills when:**
+
 - **building-admin-dashboard-customizations:** Building admin UI (widgets, pages, forms)
 - **building-storefronts:** Calling backend API routes from storefronts (SDK integration)
 
@@ -52,6 +54,7 @@ Frontend (admin dashboard/storefront via SDK)
 ```
 
 **Key conventions:**
+
 - Only GET, POST, DELETE methods (never PUT/PATCH)
 - Workflows are required for ALL mutations
 - Business logic belongs in workflow steps, NOT routes
@@ -61,14 +64,14 @@ Frontend (admin dashboard/storefront via SDK)
 
 ## Rule Categories by Priority
 
-| Priority | Category | Impact | Prefix |
-|----------|----------|--------|--------|
-| 1 | Architecture Violations | CRITICAL | `arch-` |
-| 2 | Type Safety | CRITICAL | `type-` |
-| 3 | Business Logic Placement | HIGH | `logic-` |
-| 4 | Import & Code Organization | HIGH | `import-` |
-| 5 | Data Access Patterns | MEDIUM (includes CRITICAL price rule) | `data-` |
-| 6 | File Organization | MEDIUM | `file-` |
+| Priority | Category                   | Impact                                | Prefix    |
+| -------- | -------------------------- | ------------------------------------- | --------- |
+| 1        | Architecture Violations    | CRITICAL                              | `arch-`   |
+| 2        | Type Safety                | CRITICAL                              | `type-`   |
+| 3        | Business Logic Placement   | HIGH                                  | `logic-`  |
+| 4        | Import & Code Organization | HIGH                                  | `import-` |
+| 5        | Data Access Patterns       | MEDIUM (includes CRITICAL price rule) | `data-`   |
+| 6        | File Organization          | MEDIUM                                | `file-`   |
 
 ## Quick Reference
 
@@ -126,26 +129,25 @@ Frontend (admin dashboard/storefront via SDK)
 
 ```typescript
 // ✅ CORRECT
-const myWorkflow = createWorkflow(
-  "name",
-  function (input) { // Regular function, not async, not arrow
-    const result = myStep(input) // No await
-    return new WorkflowResponse(result)
-  }
-)
+const myWorkflow = createWorkflow("name", function (input) {
+  // Regular function, not async, not arrow
+  const result = myStep(input); // No await
+  return new WorkflowResponse(result);
+});
 
 // ❌ WRONG
-const myWorkflow = createWorkflow(
-  "name",
-  async (input) => { // ❌ No async, no arrow functions
-    const result = await myStep(input) // ❌ No await
-    if (input.condition) { /* ... */ } // ❌ No conditionals
-    return new WorkflowResponse(result)
-  }
-)
+const myWorkflow = createWorkflow("name", async (input) => {
+  // ❌ No async, no arrow functions
+  const result = await myStep(input); // ❌ No await
+  if (input.condition) {
+    /* ... */
+  } // ❌ No conditionals
+  return new WorkflowResponse(result);
+});
 ```
 
 **Constraints:**
+
 - No async/await (runs at load time)
 - No arrow functions (use `function`)
 - No conditionals/ternaries (use `when()`)
@@ -158,6 +160,7 @@ const myWorkflow = createWorkflow(
 Before implementing, verify you're NOT doing these:
 
 **Architecture:**
+
 - [ ] Calling module services directly from API routes
 - [ ] Using PUT or PATCH methods
 - [ ] Bypassing workflows for mutations
@@ -165,6 +168,7 @@ Before implementing, verify you're NOT doing these:
 - [ ] Skipping migrations after creating module links
 
 **Type Safety:**
+
 - [ ] Forgetting `MedusaRequest<SchemaType>` type argument
 - [ ] Using `MedusaRequest` instead of `AuthenticatedMedusaRequest` for protected routes
 - [ ] Not exporting Zod inferred type from middlewares
@@ -172,15 +176,18 @@ Before implementing, verify you're NOT doing these:
 - [ ] Using dashes in module names (must be camelCase)
 
 **Business Logic:**
+
 - [ ] Validating business rules in API routes
 - [ ] Checking ownership in routes instead of workflows
 - [ ] Manually checking `req.auth_context?.actor_id` when middleware already applied
 
 **Imports:**
+
 - [ ] Using `await import()` in route handler bodies
 - [ ] Dynamic imports for workflows or modules
 
 **Data Access:**
+
 - [ ] **CRITICAL**: Multiplying prices by 100 when saving or dividing by 100 when displaying (prices are stored as-is: $49.99 = 49.99)
 - [ ] Filtering by linked module fields with `query.graph()` (use `query.index()` or query from other side instead)
 - [ ] Using JavaScript `.filter()` on linked data (use `query.index()` or query the linked entity directly)
@@ -192,6 +199,7 @@ Before implementing, verify you're NOT doing these:
 **CRITICAL: Always run the build command after completing implementation to catch type errors and runtime issues.**
 
 ### When to Validate
+
 - After implementing any new feature
 - After making changes to modules, workflows, or API routes
 - Before marking tasks as complete
@@ -208,12 +216,14 @@ npm run build      # or pnpm build / yarn build
 ### Handling Build Errors
 
 If the build fails:
+
 1. Read the error messages carefully
 2. Fix type errors, import issues, and syntax errors
 3. Run the build again to verify the fix
 4. Do NOT mark implementation as complete until build succeeds
 
 **Common build errors:**
+
 - Missing imports or exports
 - Type mismatches (e.g., missing `MedusaRequest<T>` type argument)
 - Incorrect workflow composition (async functions, conditionals)
@@ -241,6 +251,7 @@ npm run dev      # or pnpm dev / yarn dev
 ### 2. Access the Admin Dashboard
 
 Open your browser and navigate to:
+
 - **Admin Dashboard:** http://localhost:9000/app
 
 Log in with your admin credentials to test any admin-related features.
@@ -250,14 +261,17 @@ Log in with your admin credentials to test any admin-related features.
 If you implemented custom API routes, list them for the user to test:
 
 **Admin Routes (require authentication):**
+
 - `POST http://localhost:9000/admin/[your-route]` - Description of what it does
 - `GET http://localhost:9000/admin/[your-route]` - Description of what it does
 
 **Store Routes (public or customer-authenticated):**
+
 - `POST http://localhost:9000/store/[your-route]` - Description of what it does
 - `GET http://localhost:9000/store/[your-route]` - Description of what it does
 
 **Testing with cURL example:**
+
 ```bash
 # Admin route (requires authentication)
 curl -X POST http://localhost:9000/admin/reviews/123/approve \
@@ -274,6 +288,7 @@ curl -X POST http://localhost:9000/store/reviews \
 ### 4. Additional Testing Steps
 
 Depending on what was implemented, mention:
+
 - **Workflows:** Test mutation operations and verify rollback on errors
 - **Subscribers:** Trigger events and check logs for subscriber execution
 - **Scheduled jobs:** Wait for job execution or check logs for cron output
@@ -288,22 +303,28 @@ Always present next steps in a clear, actionable format after implementation:
 The [feature name] has been successfully implemented. Here's how to test it:
 
 ### Start the Development Server
+
 [server start command based on package manager]
 
 ### Access the Admin Dashboard
+
 Open http://localhost:9000/app in your browser
 
 ### Test the API Routes
+
 I've added the following routes:
 
 **Admin Routes:**
+
 - POST /admin/[route] - [description]
 - GET /admin/[route] - [description]
 
 **Store Routes:**
+
 - POST /store/[route] - [description]
 
 ### What to Test
+
 1. [Specific test case 1]
 2. [Specific test case 2]
 3. [Specific test case 3]
@@ -327,6 +348,7 @@ reference/troubleshooting.md    - Common errors and solutions
 ```
 
 Each reference file contains:
+
 - Step-by-step implementation checklists
 - Correct vs incorrect code examples
 - TypeScript patterns and type safety
@@ -337,6 +359,7 @@ Each reference file contains:
 **⚠️ CRITICAL: This skill should be consulted FIRST for planning and implementation.**
 
 **Use this skill for (PRIMARY SOURCE):**
+
 - **Planning** - Understanding how to structure Medusa backend features
 - **Architecture** - Module → Workflow → API Route patterns
 - **Best practices** - Correct vs incorrect code patterns
@@ -344,12 +367,14 @@ Each reference file contains:
 - **Implementation patterns** - Step-by-step guides with checklists
 
 **Use MedusaDocs MCP server for (SECONDARY SOURCE):**
+
 - Specific method signatures after you know which method to use
 - Built-in module configuration options
 - Official type definitions
 - Framework-level configuration details
 
 **Why skills come first:**
+
 - Skills contain opinionated guidance and anti-patterns MCP doesn't have
 - Skills show architectural patterns needed for planning
 - MCP is reference material; skills are prescriptive guidance
@@ -361,6 +386,7 @@ Each reference file contains:
 When building features that span backend and frontend:
 
 **For Admin Dashboard:**
+
 1. **Backend (this skill):** Module → Workflow → API Route
 2. **Frontend:** Load `building-admin-dashboard-customizations` skill
 3. **Connection:**
@@ -369,6 +395,7 @@ When building features that span backend and frontend:
    - **NEVER use regular fetch()** - missing auth headers will cause errors
 
 **For Storefronts:**
+
 1. **Backend (this skill):** Module → Workflow → API Route
 2. **Frontend:** Load `building-storefronts` skill
 3. **Connection:**
@@ -377,6 +404,7 @@ When building features that span backend and frontend:
    - **NEVER use regular fetch()** - missing publishable API key will cause errors
 
 **Why the SDK is required:**
+
 - Store routes need `x-publishable-api-key` header
 - Admin routes need `Authorization` and session headers
 - SDK handles all required headers automatically

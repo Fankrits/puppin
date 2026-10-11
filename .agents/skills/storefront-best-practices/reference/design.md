@@ -25,17 +25,20 @@ Before implementing any component, identify existing brand colors, typography, a
 ### What to Look For
 
 **Colors:**
+
 1. **Tailwind config** (`tailwind.config.ts/js`) - Check `theme.extend.colors` or `theme.colors`
 2. **CSS variables** (globals.css, app.css) - Look for `:root { --color-primary: ... }`
 3. **Existing components** - Scan 2-3 components for color usage patterns
 
 **Typography:**
+
 1. **Tailwind config** - Check `theme.extend.fontFamily`
 2. **Font imports** - Look in layout files or CSS (Next.js `next/font`, Google Fonts, local fonts)
 3. **CSS variables** - Check for `--font-sans`, `--font-heading`
 4. **Existing components** - Identify font usage patterns
 
 **Other patterns:**
+
 - Spacing scale (p-4, mb-6, etc.)
 - Border radius (rounded-lg, rounded-xl)
 - Shadows (shadow-md, shadow-lg)
@@ -48,6 +51,7 @@ Before implementing any component, identify existing brand colors, typography, a
 Tailwind v3 and v4 have different syntax, and mixing them causes errors.
 
 **How to detect version:**
+
 1. **Check `package.json`**: Look for `"tailwindcss": "^3.x.x"` or `"tailwindcss": "^4.x.x"`
 2. **Check config file**:
    - v3: Uses `tailwind.config.js/ts` with `module.exports` or `export default`
@@ -57,12 +61,14 @@ Tailwind v3 and v4 have different syntax, and mixing them causes errors.
 **Key differences:**
 
 **Tailwind v3:**
+
 ```tsx
 // v3 syntax
 <div className="bg-primary text-white">Content</div>
 ```
 
 **Tailwind v4:**
+
 ```tsx
 // v4 may use CSS variables differently
 // Check the project's existing patterns
@@ -74,6 +80,7 @@ Tailwind v3 and v4 have different syntax, and mixing them causes errors.
 ### Document Discovery
 
 Create mental inventory of:
+
 - **Primary color(s)** and their usage
 - **Font families** (sans, serif, heading, mono)
 - **Common patterns** (button styles, card designs, spacing)
@@ -133,27 +140,29 @@ Create mental inventory of:
 ```tsx
 // If existing buttons use: bg-primary px-6 py-3 rounded-lg
 // New buttons should use the same pattern
-<button className="bg-primary px-6 py-3 rounded-lg">
-  New Button
-</button>
+<button className="bg-primary px-6 py-3 rounded-lg">New Button</button>
 ```
 
 ### NEVER Do These Things
 
 ❌ **DON'T introduce new colors without user approval**
+
 - If you need a color not in the theme, ASK first
 - Don't use arbitrary values like `bg-[#FF6B6B]` when theme has colors
 
 ❌ **DON'T add new fonts without user approval**
+
 - If current design uses Inter, don't add Montserrat without asking
 - Don't use `font-['NewFont']` syntax when theme fonts exist
 
 ❌ **DON'T use hard-coded values when theme tokens exist**
+
 - Use `bg-primary` not `bg-[#3B82F6]`
 - Use `p-6` not `p-[24px]`
 - Use `font-heading` not `font-['Poppins']`
 
 ❌ **DON'T create inconsistent patterns**
+
 - If buttons use `rounded-lg`, all buttons should
 - If cards use `shadow-md`, all cards should
 - If hover effects use `hover:bg-primary-dark`, be consistent
@@ -212,6 +221,7 @@ When starting a new project WITHOUT existing theme:
 ### Ask User These Questions
 
 **1. Brand Colors:**
+
 ```
 "What are your brand colors? Please provide:
 - Primary color (main brand color)
@@ -220,6 +230,7 @@ When starting a new project WITHOUT existing theme:
 ```
 
 **2. Font Preferences:**
+
 ```
 "Do you have font preferences?
 - Modern and clean (Inter, Poppins)
@@ -229,6 +240,7 @@ When starting a new project WITHOUT existing theme:
 ```
 
 **3. Design Style:**
+
 ```
 "What design style do you prefer?
 - Minimal (lots of whitespace, clean lines)
@@ -238,6 +250,7 @@ When starting a new project WITHOUT existing theme:
 ```
 
 **4. Reference Sites (Optional):**
+
 ```
 "Do you have 2-3 example websites you like the look of?
 This helps me understand your aesthetic preferences."
@@ -253,23 +266,23 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#3B82F6',     // User's primary color
-        secondary: '#8B5CF6',    // User's secondary
-        accent: '#F59E0B',       // Accent if needed
+        primary: "#3B82F6", // User's primary color
+        secondary: "#8B5CF6", // User's secondary
+        accent: "#F59E0B", // Accent if needed
         // Full scales if sophisticated design
         brand: {
-          50: '#eff6ff',
-          500: '#3b82f6',
-          900: '#1e3a8a',
-        }
+          50: "#eff6ff",
+          500: "#3b82f6",
+          900: "#1e3a8a",
+        },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        heading: ['Poppins', 'sans-serif'],
+        sans: ["Inter", "system-ui", "sans-serif"],
+        heading: ["Poppins", "sans-serif"],
       },
     },
   },
-}
+};
 ```
 
 **Use Tailwind CSS for all new projects** - industry standard for ecommerce, highly customizable, excellent DX.

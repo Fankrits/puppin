@@ -20,6 +20,7 @@ Cart popup (mini cart/cart drawer) shows quick cart overview without navigating 
 **Assumed knowledge**: AI agents know how to build modals, dialogs, and overlays. This focuses on ecommerce-specific patterns.
 
 **Cart popup vs full cart page:**
+
 - Popup: Quick overview, fast checkout path, continue shopping easily
 - Full page: Detailed review, promo codes, complex operations
 - **Recommended**: Both - popup for speed, full cart page for details
@@ -33,6 +34,7 @@ Cart popup (mini cart/cart drawer) shows quick cart overview without navigating 
 3. **Hover cart icon** (desktop only, optional) - Quick peek on hover. Can be accidental, not recommended.
 
 **Add-to-cart feedback alternatives:**
+
 - Show popup (most common) - Immediate confirmation, clear path to checkout
 - Toast only (less intrusive) - Small notification, user clicks cart icon to see details
 - Navigate to cart page (traditional) - Goes directly to full cart page, less common now
@@ -42,17 +44,20 @@ Cart popup (mini cart/cart drawer) shows quick cart overview without navigating 
 **Two common patterns:**
 
 **1. Dropdown (recommended for simplicity):**
+
 - Drops down from cart icon, positioned below navbar
 - Width: 280-320px, max height with scroll
 - No backdrop overlay (click outside to close)
 - Better for few items, simpler implementation
 
 **2. Slide-in drawer (more prominent):**
+
 - Slides from right, full height, width 320-400px (desktop) or 80-90% (mobile)
 - Semi-transparent backdrop overlay (click to close)
 - Better for multiple items or complex carts
 
 **Both patterns have:**
+
 - Header: Title + item count + close button (optional for dropdown)
 - Scrollable content: List of cart items
 - Sticky footer: Subtotal + action buttons (Checkout, View Cart)
@@ -60,17 +65,20 @@ Cart popup (mini cart/cart drawer) shows quick cart overview without navigating 
 ## Cart Display
 
 **Fetch cart data from backend:**
+
 - Cart ID from localStorage
 - Line items (products, variants, quantities, prices)
 - Cart totals (subtotal, tax, shipping)
 - See connecting-to-backend.md for backend integration
 
 **When to fetch:**
+
 - On app initialization (update cart icon badge)
 - On popup open (show loading state)
 - After cart updates (add/remove/change quantity)
 
 **State management:**
+
 - Store cart data globally (React Context or TanStack Query)
 - Persist cart ID in localStorage
 - Optimistic UI updates (update immediately, revert on error)
@@ -95,6 +103,7 @@ Without variant details, users can't confirm they added the correct variant. Thi
 - Remove button (X icon, no confirmation needed)
 
 **Why variant details are critical:**
+
 - User confirmation: "Did I add the right size?"
 - Prevents cart abandonment from uncertainty
 - Allows corrections before checkout
@@ -103,20 +112,24 @@ Without variant details, users can't confirm they added the correct variant. Thi
 ## Actions and CTAs
 
 **Cart summary display:**
+
 - Subtotal (sum of all items)
 - Shipping and tax: "Calculated at checkout" or actual amount
 - Total: Bold and prominent
 
 **Free shipping indicator (optional):**
+
 - "Add $25 more for free shipping" with progress bar
 - Encourages larger orders, updates as cart changes
 
 **Promo codes:**
+
 - Usually NOT in cart popup (too cramped)
 - Reserve for full cart page
 - Exception: Simple code input if space permits
 
 **Action buttons:**
+
 1. **Checkout** (primary) - Most prominent, high contrast (brand color), navigates to checkout
 2. **View Cart** (secondary) - Outline or subtle, navigates to full cart page
 
@@ -131,11 +144,13 @@ Show icon/illustration + "Your cart is empty" + "Continue Shopping" button. Cent
 **On popup open**: Show skeleton/placeholder while fetching (avoid blank screen)
 
 **During updates**:
+
 - Quantity changes: Inline spinner, disable controls, debounce 300-500ms
 - Item removal: Fade out animation, disable remove button during request
 - Add to cart: Loading indicator on button ("Adding...")
 
 **Error handling**:
+
 - Network errors: Show retry option, don't close popup
 - Invalid cart ID: Create new cart automatically
 - Out of stock: Disable quantity increase, show message
@@ -146,17 +161,20 @@ Show icon/illustration + "Your cart is empty" + "Continue Shopping" button. Cent
 ## Mobile Considerations
 
 **Dropdown on mobile:**
+
 - Full-width (100% minus margins)
 - Max height 60-70% viewport, scrollable
 - Tap outside to close
 
 **Drawer on mobile:**
+
 - 85-95% screen width or full screen
 - Slides from right or bottom
 - Swipe to close gesture supported
 - Backdrop overlay
 
 **Mobile adjustments:**
+
 - Large touch targets (44-48px minimum)
 - Full-width action buttons (48-52px height)
 - Smaller images (60px), truncate titles
@@ -166,6 +184,7 @@ Show icon/illustration + "Your cart is empty" + "Continue Shopping" button. Cent
 ## Checklist
 
 **Essential features:**
+
 - [ ] Opens on cart icon click
 - [ ] Dropdown (280-320px) or drawer (320-400px) layout
 - [ ] Close button or click outside to close

@@ -3,6 +3,7 @@
 Subscribers are asynchronous functions that execute when specific events are emitted. Use them to perform actions after commerce operations, like sending confirmation emails when an order is placed.
 
 ## Contents
+
 - [When to Use Subscribers](#when-to-use-subscribers)
 - [Creating a Subscriber](#creating-a-subscriber)
 - [Common Commerce Events](#common-commerce-events)
@@ -21,11 +22,13 @@ Use subscribers when you need to **react to events** that happen in your applica
 - ✅ Perform non-blocking side effects
 
 **Don't use subscribers for:**
+
 - ❌ Periodic tasks (use [scheduled jobs](scheduled-jobs.md) instead)
 - ❌ Operations that must block the main flow (use workflows instead)
 - ❌ Scheduling future tasks (subscribers execute immediately)
 
 **Subscribers vs Scheduled Jobs:**
+
 - **Subscriber**: Reacts to `order.placed` event and sends confirmation email (event-driven)
 - **Scheduled Job**: Finds abandoned carts every 6 hours and sends emails (polling pattern)
 
@@ -35,25 +38,25 @@ Create a TypeScript file in the `src/subscribers/` directory:
 
 ```typescript
 // src/subscribers/order-placed.ts
-import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework";
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
 
 export default async function orderPlacedHandler({
   event: { eventName, data },
   container,
 }: SubscriberArgs<{ id: string }>) {
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
 
-  logger.info(`Order ${data.id} was placed`)
+  logger.info(`Order ${data.id} was placed`);
 
   // Resolve services
-  const orderService = container.resolve(Modules.ORDER)
-  const notificationService = container.resolve(Modules.NOTIFICATION)
+  const orderService = container.resolve(Modules.ORDER);
+  const notificationService = container.resolve(Modules.NOTIFICATION);
 
   // Retrieve full order data
   const order = await orderService.retrieveOrder(data.id, {
     relations: ["customer", "items"],
-  })
+  });
 
   // Send confirmation email
   await notificationService.createNotifications({
@@ -61,48 +64,48 @@ export default async function orderPlacedHandler({
     template: "order-confirmation",
     channel: "email",
     data: { order },
-  })
+  });
 
-  logger.info(`Confirmation email sent for order ${data.id}`)
+  logger.info(`Confirmation email sent for order ${data.id}`);
 }
 
 export const config: SubscriberConfig = {
   event: "order.placed", // Single event
-}
+};
 ```
 
 ### Listening to Multiple Events
 
 ```typescript
 // src/subscribers/product-changes.ts
-import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework";
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
 export default async function productChangesHandler({
   event: { eventName, data },
   container,
 }: SubscriberArgs<{ id: string }>) {
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
 
-  logger.info(`Product event: ${eventName} for product ${data.id}`)
+  logger.info(`Product event: ${eventName} for product ${data.id}`);
 
   // Handle different events
   switch (eventName) {
     case "product.created":
       // Handle product creation
-      break
+      break;
     case "product.updated":
       // Handle product update
-      break
+      break;
     case "product.deleted":
       // Handle product deletion
-      break
+      break;
   }
 }
 
 export const config: SubscriberConfig = {
   event: ["product.created", "product.updated", "product.deleted"],
-}
+};
 ```
 
 ## Common Commerce Events
@@ -112,33 +115,33 @@ export const config: SubscriberConfig = {
 ### Order Events
 
 ```typescript
-"order.placed" // Order was placed
-"order.updated" // Order was updated
-"order.canceled" // Order was canceled
-"order.completed" // Order was completed
-"order.shipment_created" // Shipment was created for order
+"order.placed"; // Order was placed
+"order.updated"; // Order was updated
+"order.canceled"; // Order was canceled
+"order.completed"; // Order was completed
+"order.shipment_created"; // Shipment was created for order
 ```
 
 ### Product Events
 
 ```typescript
-"product.created" // Product was created
-"product.updated" // Product was updated
-"product.deleted" // Product was deleted
+"product.created"; // Product was created
+"product.updated"; // Product was updated
+"product.deleted"; // Product was deleted
 ```
 
 ### Customer Events
 
 ```typescript
-"customer.created" // Customer was created
-"customer.updated" // Customer was updated
+"customer.created"; // Customer was created
+"customer.updated"; // Customer was updated
 ```
 
 ### Cart Events
 
 ```typescript
-"cart.created" // Cart was created
-"cart.updated" // Cart was updated
+"cart.created"; // Cart was created
+"cart.updated"; // Cart was updated
 ```
 
 ### Inventory Events
@@ -146,12 +149,12 @@ export const config: SubscriberConfig = {
 **All of the events below were added in v2.17.3** — they don't exist in earlier versions.
 
 ```typescript
-"inventory-item.created" // Inventory items were created
-"inventory-item.updated" // Inventory items were updated
-"inventory-item.deleted" // Inventory items were deleted
-"inventory-level.created" // Inventory levels were created
-"inventory-level.updated" // Stocked/reserved quantity changed (e.g. during fulfillment)
-"inventory-level.deleted" // Inventory levels were deleted
+"inventory-item.created"; // Inventory items were created
+"inventory-item.updated"; // Inventory items were updated
+"inventory-item.deleted"; // Inventory items were deleted
+"inventory-level.created"; // Inventory levels were created
+"inventory-level.updated"; // Stocked/reserved quantity changed (e.g. during fulfillment)
+"inventory-level.deleted"; // Inventory levels were deleted
 ```
 
 Use these to sync stock to external systems or alert on low levels. `inventory-level.updated` carries `{ id, order_id? }` — `order_id` is set when the change came from an order flow.
@@ -159,24 +162,24 @@ Use these to sync stock to external systems or alert on low levels. `inventory-l
 ### Auth Events
 
 ```typescript
-"auth.password_reset" // Password reset was requested
-"auth.verification_requested" // A verification code was generated (v2.15.5+)
-"auth.mfa_enabled" // An MFA factor was enabled (v2.15.5+)
-"auth.mfa_disabled" // An MFA factor was disabled
-"auth.mfa_recovery_codes_generated" // Recovery codes were generated
+"auth.password_reset"; // Password reset was requested
+"auth.verification_requested"; // A verification code was generated (v2.15.5+)
+"auth.mfa_enabled"; // An MFA factor was enabled (v2.15.5+)
+"auth.mfa_disabled"; // An MFA factor was disabled
+"auth.mfa_recovery_codes_generated"; // Recovery codes were generated
 ```
 
 **⚠️ `auth.verification_requested` payload changed in v2.16.0.** It is now:
 
 ```typescript
 {
-  entity_id      // The identifier being verified, e.g. an email address
-  entity_type    // e.g. "email"
-  code_provider  // Defaults to "token"
-  auth_identity_id
-  code           // The verification code — was called `token` before v2.16.0
-  expires_at
-  metadata
+  entity_id; // The identifier being verified, e.g. an email address
+  entity_type; // e.g. "email"
+  code_provider; // Defaults to "token"
+  auth_identity_id;
+  code; // The verification code — was called `token` before v2.16.0
+  expires_at;
+  metadata;
 }
 ```
 
@@ -185,7 +188,7 @@ Use these to sync stock to external systems or alert on low levels. `inventory-l
 ### Invite Events
 
 ```typescript
-"invite.created" // Invite was created (for admin users)
+"invite.created"; // Invite was created (for admin users)
 ```
 
 **For a complete list of events**, ask MedusaDocs for the specific module's events.
@@ -197,10 +200,10 @@ Use these to sync stock to external systems or alert on low levels. `inventory-l
 ```typescript
 interface SubscriberArgs<T> {
   event: {
-    eventName: string // e.g., "order.placed"
-    data: T // Event payload (usually contains { id: string })
-  }
-  container: MedusaContainer // DI container
+    eventName: string; // e.g., "order.placed"
+    data: T; // Event payload (usually contains { id: string })
+  };
+  container: MedusaContainer; // DI container
 }
 ```
 
@@ -210,44 +213,37 @@ interface SubscriberArgs<T> {
 
 ```typescript
 // src/subscribers/order-placed.ts
-import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework"
+import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework";
 
 export default async function orderPlacedHandler({
   event: { data },
   container,
 }: SubscriberArgs<{ id: string }>) {
-  const logger = container.resolve("logger")
-  const query = container.resolve("query")
+  const logger = container.resolve("logger");
+  const query = container.resolve("query");
 
   // data.id contains the order ID
-  logger.info(`Handling order.placed event for order: ${data.id}`)
+  logger.info(`Handling order.placed event for order: ${data.id}`);
 
   // Retrieve full order data with relations
   const { data: orders } = await query.graph({
     entity: "order",
-    fields: [
-      "id",
-      "email",
-      "total",
-      "customer.*",
-      "items.*",
-      "items.product.*",
-    ],
+    fields: ["id", "email", "total", "customer.*", "items.*", "items.product.*"],
     filters: {
       id: data.id,
     },
-  })
+  });
 
-  const order = orders[0]
+  const order = orders[0];
 
   // Now you have the full order data
-  logger.info(`Order total: ${order.total}`)
-  logger.info(`Customer email: ${order.customer.email}`)
+  logger.info(`Order total: ${order.total}`);
+  logger.info(`Customer email: ${order.customer.email}`);
 }
 
 export const config: SubscriberConfig = {
   event: "order.placed",
-}
+};
 ```
 
 ### Using Module Services
@@ -257,13 +253,13 @@ export default async function productUpdatedHandler({
   event: { data },
   container,
 }: SubscriberArgs<{ id: string }>) {
-  const productService = container.resolve("product")
+  const productService = container.resolve("product");
 
   // Retrieve product using service
   const product = await productService.retrieveProduct(data.id, {
     select: ["id", "title", "status"],
     relations: ["variants"],
-  })
+  });
 
   // Process product
 }
@@ -275,14 +271,14 @@ Emit custom events from workflows using the `emitEventStep`:
 
 ```typescript
 // src/workflows/create-review.ts
-import { createWorkflow, WorkflowResponse } from "@medusajs/framework/workflows-sdk"
-import { emitEventStep } from "@medusajs/medusa/core-flows"
+import { createWorkflow, WorkflowResponse } from "@medusajs/framework/workflows-sdk";
+import { emitEventStep } from "@medusajs/medusa/core-flows";
 
 const createReviewWorkflow = createWorkflow(
   "create-review",
   function (input: { product_id: string; rating: number }) {
     // Create review step
-    const review = createReviewStep(input)
+    const review = createReviewStep(input);
 
     // Emit custom event
     emitEventStep({
@@ -292,33 +288,33 @@ const createReviewWorkflow = createWorkflow(
         product_id: input.product_id,
         rating: input.rating,
       },
-    })
+    });
 
-    return new WorkflowResponse({ review })
-  }
-)
+    return new WorkflowResponse({ review });
+  },
+);
 
-export default createReviewWorkflow
+export default createReviewWorkflow;
 ```
 
 Then create a subscriber for the custom event:
 
 ```typescript
 // src/subscribers/review-created.ts
-import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework"
+import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework";
 
 export default async function reviewCreatedHandler({
   event: { data },
   container,
 }: SubscriberArgs<{ id: string; product_id: string; rating: number }>) {
-  const logger = container.resolve("logger")
-  const query = container.resolve("query")
+  const logger = container.resolve("logger");
+  const query = container.resolve("query");
 
-  logger.info(`Review ${data.id} created for product ${data.product_id}`)
+  logger.info(`Review ${data.id} created for product ${data.product_id}`);
 
   // If rating is low, notify support
   if (data.rating <= 2) {
-    const notificationService = container.resolve("notification")
+    const notificationService = container.resolve("notification");
     await notificationService.createNotifications({
       to: "support@example.com",
       template: "low-rating-alert",
@@ -328,13 +324,13 @@ export default async function reviewCreatedHandler({
         product_id: data.product_id,
         rating: data.rating,
       },
-    })
+    });
   }
 }
 
 export const config: SubscriberConfig = {
   event: "review.created",
-}
+};
 ```
 
 ## Best Practices
@@ -346,15 +342,15 @@ export default async function mySubscriber({
   event: { eventName, data },
   container,
 }: SubscriberArgs<{ id: string }>) {
-  const logger = container.resolve("logger")
+  const logger = container.resolve("logger");
 
-  logger.info(`Handling ${eventName} for ${data.id}`)
+  logger.info(`Handling ${eventName} for ${data.id}`);
 
   try {
     // Subscriber logic
-    logger.info(`Successfully handled ${eventName}`)
+    logger.info(`Successfully handled ${eventName}`);
   } catch (error) {
-    logger.error(`Failed to handle ${eventName}: ${error.message}`)
+    logger.error(`Failed to handle ${eventName}: ${error.message}`);
   }
 }
 ```
@@ -369,13 +365,13 @@ export default async function mySubscriber({
   event: { data },
   container,
 }: SubscriberArgs<{ id: string }>) {
-  const logger = container.resolve("logger")
+  const logger = container.resolve("logger");
 
   try {
     // Subscriber logic that might fail
-    await sendEmail(data.id)
+    await sendEmail(data.id);
   } catch (error) {
-    logger.error(`Failed to send email: ${error.message}`)
+    logger.error(`Failed to send email: ${error.message}`);
     // Don't throw - subscriber completes gracefully
   }
 }
@@ -384,6 +380,7 @@ export default async function mySubscriber({
 ### 3. Keep Subscribers Fast and Non-Blocking
 
 Subscribers should perform quick operations. For long-running tasks, consider:
+
 - Queuing the task for background processing
 - Using scheduled jobs instead
 - Breaking the work into smaller steps
@@ -394,15 +391,15 @@ export default async function orderPlacedHandler({
   event: { data },
   container,
 }: SubscriberArgs<{ id: string }>) {
-  const notificationService = container.resolve("notification")
+  const notificationService = container.resolve("notification");
 
   // Quick: Queue email for sending
   await notificationService.createNotifications({
     to: "customer@example.com",
     template: "order-confirmation",
-      channel: "email",
+    channel: "email",
     data: { order_id: data.id },
-  })
+  });
 }
 ```
 
@@ -412,22 +409,22 @@ If your subscriber needs to perform mutations, use workflows:
 
 ```typescript
 // ✅ GOOD: Uses workflow for mutations
-import { syncProductWorkflow } from "../workflows/sync-product"
+import { syncProductWorkflow } from "../workflows/sync-product";
 
 export default async function productCreatedHandler({
   event: { data },
   container,
 }: SubscriberArgs<{ id: string }>) {
-  const logger = container.resolve("logger")
+  const logger = container.resolve("logger");
 
   // Execute workflow to sync to external system
   try {
     await syncProductWorkflow(container).run({
       input: { product_id: data.id },
-    })
-    logger.info(`Product ${data.id} synced successfully`)
+    });
+    logger.info(`Product ${data.id} synced successfully`);
   } catch (error) {
-    logger.error(`Failed to sync product ${data.id}: ${error.message}`)
+    logger.error(`Failed to sync product ${data.id}: ${error.message}`);
   }
 }
 ```
@@ -442,13 +439,13 @@ export default async function productUpdatedHandler({
   event: { data },
   container,
 }: SubscriberArgs<{ id: string }>) {
-  const productService = container.resolve("product")
+  const productService = container.resolve("product");
 
   // This triggers another product.updated event!
   await productService.updateProducts({
     id: data.id,
     metadata: { last_updated: new Date() },
-  })
+  });
 }
 
 // ✅ GOOD: Add guard condition
@@ -456,25 +453,25 @@ export default async function productUpdatedHandler({
   event: { data },
   container,
 }: SubscriberArgs<{ id: string }>) {
-  const logger = container.resolve("logger")
-  const query = container.resolve("query")
+  const logger = container.resolve("logger");
+  const query = container.resolve("query");
 
   // Retrieve product to check if we should update
   const { data: products } = await query.graph({
     entity: "product",
     fields: ["id", "metadata"],
     filters: { id: data.id },
-  })
+  });
 
-  const product = products[0]
+  const product = products[0];
 
   // Guard: Only update if not already processed
   if (!product.metadata?.processed) {
-    const productService = container.resolve("product")
+    const productService = container.resolve("product");
     await productService.updateProducts({
       id: data.id,
       metadata: { processed: true },
-    })
+    });
   }
 }
 ```
@@ -488,22 +485,22 @@ export default async function orderPlacedHandler({
   event: { data },
   container,
 }: SubscriberArgs<{ id: string }>) {
-  const logger = container.resolve("logger")
-  const myService = container.resolve("my-service")
+  const logger = container.resolve("logger");
+  const myService = container.resolve("my-service");
 
   // Check if we've already processed this order
-  const processed = await myService.isOrderProcessed(data.id)
+  const processed = await myService.isOrderProcessed(data.id);
 
   if (processed) {
-    logger.info(`Order ${data.id} already processed, skipping`)
-    return
+    logger.info(`Order ${data.id} already processed, skipping`);
+    return;
   }
 
   // Process order
-  await myService.processOrder(data.id)
+  await myService.processOrder(data.id);
 
   // Mark as processed
-  await myService.markOrderAsProcessed(data.id)
+  await myService.markOrderAsProcessed(data.id);
 }
 ```
 
@@ -511,18 +508,18 @@ export default async function orderPlacedHandler({
 
 ```typescript
 // src/subscribers/order-placed.ts
-import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework"
+import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework";
 
 export default async function sendOrderConfirmationEmail({
   event: { data },
   container,
 }: SubscriberArgs<{ id: string }>) {
-  const logger = container.resolve("logger")
+  const logger = container.resolve("logger");
 
-  logger.info(`Sending order confirmation for order: ${data.id}`)
+  logger.info(`Sending order confirmation for order: ${data.id}`);
 
   try {
-    const query = container.resolve("query")
+    const query = container.resolve("query");
 
     // Retrieve full order data
     const { data: orders } = await query.graph({
@@ -542,17 +539,17 @@ export default async function sendOrderConfirmationEmail({
       filters: {
         id: data.id,
       },
-    })
+    });
 
     if (!orders || orders.length === 0) {
-      logger.error(`Order ${data.id} not found`)
-      return
+      logger.error(`Order ${data.id} not found`);
+      return;
     }
 
-    const order = orders[0]
+    const order = orders[0];
 
     // Send confirmation email
-    const notificationService = container.resolve("notification")
+    const notificationService = container.resolve("notification");
     await notificationService.createNotifications({
       to: order.email,
       template: "order-confirmation",
@@ -565,17 +562,15 @@ export default async function sendOrderConfirmationEmail({
         currency: order.currency_code,
         shipping_address: order.shipping_address,
       },
-    })
+    });
 
-    logger.info(`Order confirmation email sent to ${order.email}`)
+    logger.info(`Order confirmation email sent to ${order.email}`);
   } catch (error) {
-    logger.error(
-      `Failed to send order confirmation for ${data.id}: ${error.message}`
-    )
+    logger.error(`Failed to send order confirmation for ${data.id}: ${error.message}`);
   }
 }
 
 export const config: SubscriberConfig = {
   event: "order.placed",
-}
+};
 ```

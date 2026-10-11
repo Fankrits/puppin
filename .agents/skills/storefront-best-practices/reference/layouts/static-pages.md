@@ -19,16 +19,19 @@ Static pages provide essential information about the store, policies, and custom
 ### Essential Static Pages
 
 **Required:**
+
 - Privacy Policy (legally required in most regions)
 - Terms and Conditions
 - Shipping and Returns
 - Contact
 
 **Strongly recommended:**
+
 - FAQ (Frequently Asked Questions)
 - About Us
 
 **Optional:**
+
 - Size Guide (for apparel stores)
 - Store Locator (if physical stores)
 
@@ -39,6 +42,7 @@ Static pages provide essential information about the store, policies, and custom
 **Purpose**: Answer common customer questions, reduce support inquiries, improve purchase confidence.
 
 **Common FAQ categories:**
+
 - Ordering and Payment
 - Shipping and Delivery
 - Returns and Exchanges
@@ -50,6 +54,7 @@ Static pages provide essential information about the store, policies, and custom
 Question as clickable header, answer hidden by default, click to expand. Compact, scannable format.
 
 **Example:**
+
 ```
 Frequently Asked Questions
 
@@ -88,6 +93,7 @@ Direct answer first sentence, additional details if needed, bullet points for li
 **Purpose**: Tell brand story, build trust and connection, showcase values and mission, differentiate from competitors.
 
 **Key sections:**
+
 - Brand story/history (how the company started)
 - Mission and values (3-5 core values)
 - Why choose us (what makes you different)
@@ -112,6 +118,7 @@ Shop products, join newsletter, follow on social media.
 ### Contact Methods
 
 **Essential:**
+
 - Contact form (primary)
 - Email address
 - Phone number (optional)
@@ -119,6 +126,7 @@ Shop products, join newsletter, follow on social media.
 - Response time expectation ("We respond within 24 hours")
 
 **Optional:**
+
 - Live chat button
 - FAQ link ("Find answers faster")
 - Social media links
@@ -127,6 +135,7 @@ Shop products, join newsletter, follow on social media.
 ### Contact Form
 
 **Form fields:**
+
 - Name (required)
 - Email (required)
 - Subject or Topic (dropdown, optional)
@@ -142,6 +151,7 @@ Clear field labels, placeholder examples, required field indicators, email valid
 ### Shipping Information
 
 **Key sections:**
+
 - Shipping methods and costs (table format)
 - Delivery timeframes
 - International shipping (if applicable)
@@ -150,6 +160,7 @@ Clear field labels, placeholder examples, required field indicators, email valid
 - Shipping restrictions
 
 **Shipping Methods Table Format:**
+
 ```
 Method          | Cost      | Delivery Time
 ──────────────────────────────────────────
@@ -162,6 +173,7 @@ Free Shipping   | Free      | Orders over $50
 ### Returns and Exchanges
 
 **Key information:**
+
 - Return window (e.g., 30 days)
 - Return conditions (unused, tags attached, etc.)
 - Refund method (original payment, store credit)
@@ -170,6 +182,7 @@ Free Shipping   | Free      | Orders over $50
 - Non-returnable items
 
 **Return process steps:**
+
 ```
 How to Return an Item
 
@@ -193,6 +206,7 @@ How to Return an Item
 **Purpose**: Legal requirement in most regions (GDPR, CCPA compliance), explain data collection and use, build customer trust.
 
 **Key sections:**
+
 - Information collected
 - How information is used
 - Data sharing and disclosure
@@ -212,6 +226,7 @@ Table of contents (for long policies), clear section headings, numbered or bulle
 **Purpose**: Legal agreement between store and customer, define rules and limitations, protect business legally.
 
 **Key sections:**
+
 - Acceptance of terms
 - Product descriptions and pricing
 - Order acceptance and cancellation
@@ -232,6 +247,7 @@ Numbered sections (1, 1.1, 1.2), table of contents for long documents, clear sec
 Help customers choose correct size, reduce returns due to sizing issues, increase purchase confidence.
 
 **Content:**
+
 - Size charts (numeric measurements) - use proper table markup
 - How to measure instructions with illustrations
 - Fit descriptions (slim fit, relaxed, etc.)
@@ -239,6 +255,7 @@ Help customers choose correct size, reduce returns due to sizing issues, increas
 - Size conversion chart (US, EU, UK)
 
 **Size Chart Format:**
+
 ```
 Women's Tops Size Guide
 
@@ -271,6 +288,7 @@ Horizontal scroll for wide tables or card layout (stacked rows), responsive desi
 Full-width inputs, 44-48px height, large submit buttons, appropriate keyboard types.
 
 **Quick actions:**
+
 - Tap-to-call: Phone numbers as clickable links (`tel:`)
 - Tap-to-email: Email addresses as clickable links (`mailto:`)
 - Map integration: "Get Directions" links to native map app
@@ -278,6 +296,7 @@ Full-width inputs, 44-48px height, large submit buttons, appropriate keyboard ty
 ### SEO for Static Pages
 
 **On-Page SEO:**
+
 - Unique title per page (50-60 characters max, format: "Page Title | Store Name")
 - Meta descriptions (150-160 characters, include call-to-action)
 - Proper heading hierarchy (one H1 per page, H2 for sections, H3 for subsections)
@@ -286,6 +305,7 @@ Full-width inputs, 44-48px height, large submit buttons, appropriate keyboard ty
 - Regular updates (especially FAQ)
 
 **Schema Markup:**
+
 - FAQ schema for FAQ pages (rich snippets)
 - Organization schema for About page
 - LocalBusiness schema for Store Locator

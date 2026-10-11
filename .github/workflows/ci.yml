@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: ["master", "main"]
+  pull_request:
+    branches: ["master", "main"]
+
+jobs:
+  quality:
+    name: Lint, Format & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Oxfmt Format Check
+        run: bun run fmt:check
+
+      - name: Oxlint Linter
+        run: bun run lint
+
+      - name: Web Type & Linter Check (Vite+ / Oxlint)
+        run: bun run check:web
+
+      - name: Run Tests
+        run: bun run test
+
+      - name: Build Web Storefront
+        run: bun run build:web

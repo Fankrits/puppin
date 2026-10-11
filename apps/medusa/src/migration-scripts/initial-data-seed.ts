@@ -7,7 +7,6 @@ import {
 } from "@medusajs/framework/utils";
 import {
   createApiKeysWorkflow,
-  createCollectionsWorkflow,
   createInventoryLevelsWorkflow,
   createProductCategoriesWorkflow,
   createProductOptionsWorkflow,
@@ -15,7 +14,6 @@ import {
   createRegionsWorkflow,
   createSalesChannelsWorkflow,
   createShippingOptionsWorkflow,
-  createShippingProfilesWorkflow,
   createStockLocationsWorkflow,
   createStoresWorkflow,
   createTaxRegionsWorkflow,
@@ -23,17 +21,11 @@ import {
   linkSalesChannelsToStockLocationWorkflow,
 } from "@medusajs/medusa/core-flows";
 
-export default async function initial_data_seed({
-  container,
-}: {
-  container: MedusaContainer;
-}) {
+export default async function initial_data_seed({ container }: { container: MedusaContainer }) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
   const link = container.resolve(ContainerRegistrationKeys.LINK);
   const query = container.resolve(ContainerRegistrationKeys.QUERY);
-  const fulfillmentModuleService = container.resolve(
-    ModuleRegistrationName.FULFILLMENT
-  );
+  const fulfillmentModuleService = container.resolve(ModuleRegistrationName.FULFILLMENT);
 
   const countries = ["gb", "de", "dk", "se", "fr", "es", "it"];
 
@@ -73,7 +65,7 @@ export default async function initial_data_seed({
   });
 
   const {
-    result: [store],
+    result: [_store],
   } = await createStoresWorkflow(container).run({
     input: {
       stores: [
@@ -121,9 +113,7 @@ export default async function initial_data_seed({
   logger.info("Finished seeding tax regions.");
 
   logger.info("Seeding stock location data...");
-  const { result: stockLocationResult } = await createStockLocationsWorkflow(
-    container
-  ).run({
+  const { result: stockLocationResult } = await createStockLocationsWorkflow(container).run({
     input: {
       locations: [
         {
@@ -297,9 +287,7 @@ export default async function initial_data_seed({
 
   logger.info("Seeding product data...");
 
-  const { result: categoryResult } = await createProductCategoriesWorkflow(
-    container
-  ).run({
+  const { result: categoryResult } = await createProductCategoriesWorkflow(container).run({
     input: {
       product_categories: [
         {
@@ -322,9 +310,7 @@ export default async function initial_data_seed({
     },
   });
 
-  const { result: productOptionsResult } = await createProductOptionsWorkflow(
-    container
-  ).run({
+  const { result: productOptionsResult } = await createProductOptionsWorkflow(container).run({
     input: {
       product_options: [
         {
@@ -346,9 +332,7 @@ export default async function initial_data_seed({
       products: [
         {
           title: "Medusa T-Shirt",
-          category_ids: [
-            categoryResult.find((cat) => cat.name === "Shirts")!.id,
-          ],
+          category_ids: [categoryResult.find((cat) => cat.name === "Shirts")!.id],
           description:
             "Reimagine the feeling of a classic T-shirt. With our cotton T-shirts, everyday essentials no longer have to be ordinary.",
           handle: "t-shirt",
@@ -369,10 +353,7 @@ export default async function initial_data_seed({
               url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/tee-white-back.png",
             },
           ],
-          options: [
-            { id: sizeOption.id },
-            { id: colorOption.id },
-          ],
+          options: [{ id: sizeOption.id }, { id: colorOption.id }],
           variants: [
             {
               title: "S / Black",
@@ -527,9 +508,7 @@ export default async function initial_data_seed({
         },
         {
           title: "Medusa Sweatshirt",
-          category_ids: [
-            categoryResult.find((cat) => cat.name === "Sweatshirts")!.id,
-          ],
+          category_ids: [categoryResult.find((cat) => cat.name === "Sweatshirts")!.id],
           description:
             "Reimagine the feeling of a classic sweatshirt. With our cotton sweatshirt, everyday essentials no longer have to be ordinary.",
           handle: "sweatshirt",
@@ -623,9 +602,7 @@ export default async function initial_data_seed({
         },
         {
           title: "Medusa Sweatpants",
-          category_ids: [
-            categoryResult.find((cat) => cat.name === "Pants")!.id,
-          ],
+          category_ids: [categoryResult.find((cat) => cat.name === "Pants")!.id],
           description:
             "Reimagine the feeling of classic sweatpants. With our cotton sweatpants, everyday essentials no longer have to be ordinary.",
           handle: "sweatpants",
@@ -719,9 +696,7 @@ export default async function initial_data_seed({
         },
         {
           title: "Medusa Shorts",
-          category_ids: [
-            categoryResult.find((cat) => cat.name === "Merch")!.id,
-          ],
+          category_ids: [categoryResult.find((cat) => cat.name === "Merch")!.id],
           description:
             "Reimagine the feeling of classic shorts. With our cotton shorts, everyday essentials no longer have to be ordinary.",
           handle: "shorts",

@@ -26,12 +26,14 @@ Breadcrumbs show the user's location within the site hierarchy (Home → Categor
 ## When to Use Breadcrumbs
 
 **Use for:**
+
 - Product pages (Home → Category → Subcategory → Product)
 - Category pages (Home → Category → Subcategory)
 - Deep site hierarchies (3+ levels)
 - Large catalogs with many categories
 
 **Don't use for:**
+
 - Homepage (no parent pages)
 - Flat site structures (1-2 levels)
 - Checkout flow (linear, not hierarchical)
@@ -42,15 +44,18 @@ Breadcrumbs show the user's location within the site hierarchy (Home → Categor
 ### Product Page Breadcrumbs
 
 **Standard pattern:**
+
 - Home / Category / Subcategory / Product Name
 - Example: Home / Electronics / Laptops / Gaming Laptop Pro
 
 **Key considerations:**
+
 - All levels except product name are clickable
 - Product name is current page (non-clickable, darker text)
 - Shows product's location in catalog
 
 **Multiple category membership:**
+
 - If product in multiple categories, choose primary/canonical
 - Match category in URL or navigation path
 - Be consistent across site
@@ -58,22 +63,26 @@ Breadcrumbs show the user's location within the site hierarchy (Home → Categor
 ### Category Page Breadcrumbs
 
 **Standard pattern:**
+
 - Home / Parent Category / Current Category
 - Example: Home / Electronics / Laptops
 
 **Current category:**
+
 - Non-clickable (plain text)
 - Visually distinct from links (darker or bold)
 
 ### Path Construction
 
 **Hierarchy:**
+
 - Start with "Home" (or home icon)
 - Follow category hierarchy
 - End with current page
 - Maximum 5-6 levels (keep shallow)
 
 **URL alignment:**
+
 - Breadcrumb path should match URL hierarchy
 - Consistent naming between URLs and breadcrumbs
 - Example: `/categories/electronics/laptops` → "Home / Electronics / Laptops"
@@ -83,17 +92,20 @@ Breadcrumbs show the user's location within the site hierarchy (Home → Categor
 ### Mobile Pattern: Collapse to Back Link
 
 **Recommended approach:**
+
 - Show only previous level as back link
 - Back arrow icon (←) + parent page name
 - Example: "← Gaming Laptops"
 
 **Why:**
+
 - Saves vertical space on mobile
 - Clear affordance (back navigation)
 - Simpler than full breadcrumb trail
 - Mobile users have device back button
 
 **Alternative: Truncated path**
+
 - Show "Home ... Current Page"
 - Hide middle levels
 - Balances space and context

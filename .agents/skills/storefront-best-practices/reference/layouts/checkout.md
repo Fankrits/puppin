@@ -36,6 +36,7 @@ Final step in conversion funnel where customers provide shipping and payment inf
 ## Decision: Single-Page vs Multi-Step
 
 **Use Single-Page Checkout when:**
+
 - Simple products with few shipping options
 - Mobile-heavy traffic (>60% mobile users)
 - Fewer form fields required (<15 total)
@@ -44,12 +45,14 @@ Final step in conversion funnel where customers provide shipping and payment inf
 - Low average order value (<$50)
 
 **Benefits:**
+
 - Fewer clicks (no step navigation)
 - User sees full scope upfront
 - Faster on mobile (no page loads)
 - Lower perceived friction
 
 **Use Multi-Step Checkout when:**
+
 - Complex shipping (international, multiple carriers)
 - B2B customers (need detailed information)
 - Many form fields required (>15 total)
@@ -58,18 +61,21 @@ Final step in conversion funnel where customers provide shipping and payment inf
 - Need clear progress indication
 
 **Benefits:**
+
 - Less overwhelming (one step at a time)
 - Progress indicator reduces anxiety
 - Easier step-by-step validation
 - Better for complex forms
 
 **Recommended: Hybrid Approach**
+
 - Single-page scroll layout on desktop
 - Accordion-based sections on mobile (expand/collapse)
 - Progressive disclosure of sections
 - Best of both worlds
 
 **Common steps:**
+
 1. Shipping Information (address)
 2. Delivery (shipping method selection)
 3. Payment (payment method and details)
@@ -80,6 +86,7 @@ Final step in conversion funnel where customers provide shipping and payment inf
 **IMPORTANT:** Guest checkout availability depends on backend support.
 
 **Guest checkout (recommended if backend supports it):**
+
 - Reduces friction (no signup barrier)
 - "Checkout as Guest" option prominent
 - Email required for order confirmation
@@ -87,6 +94,7 @@ Final step in conversion funnel where customers provide shipping and payment inf
 - Don't force account creation
 
 **Logged-in checkout:**
+
 - Pre-fill saved addresses and payment methods
 - "Returning customer? Log in" link at top
 - Allow seamless switch between guest/login
@@ -96,12 +104,14 @@ Final step in conversion funnel where customers provide shipping and payment inf
 **Build separate components for each checkout step for better maintainability and reusability.**
 
 ✅ **Create individual step components:**
+
 - `ShippingInformationStep` - Contact and shipping address form
 - `DeliveryMethodStep` - Shipping method selection
 - `PaymentInformationStep` - Payment method and details
 - `OrderReviewStep` - Final review before submission
 
 **Benefits of component separation:**
+
 - **Maintainability**: Fix bugs or update one step without affecting others
 - **Reusability**: Reuse shipping address component in account settings, checkout, etc.
 - **Testability**: Test each step independently
@@ -111,12 +121,14 @@ Final step in conversion funnel where customers provide shipping and payment inf
 - **Performance**: Lazy load steps or split bundles for faster initial load
 
 **What to separate:**
+
 - Main checkout page/container component
 - Individual step components (ShippingInformationStep, DeliveryMethodStep, etc.)
 - Reusable order summary component (shown on all steps)
 
 **Component communication:**
 Each step component should accept:
+
 - Current step data (form values)
 - Callback to update data (e.g., `onShippingUpdate`)
 - Callback to proceed to next step (e.g., `onContinue`)
@@ -124,16 +136,19 @@ Each step component should accept:
 - Validation errors
 
 **Shared components:**
+
 - Address form (used in shipping and billing)
 - Payment method selector
 - Order summary (sidebar, shown on all steps)
 
 **Works for both single-page and multi-step:**
+
 - Single-page: Render all steps at once, scroll-based navigation
 - Multi-step: Show one component at a time, controlled by step state
 - Accordion: Expand/collapse components as sections
 
 **Common mistake:**
+
 - ❌ Building entire checkout as one massive component with all form fields, logic, and validation mixed together
 - ✅ Separate components for each step, shared state management in parent
 
@@ -213,16 +228,19 @@ Each step component should accept:
 ### Shipping Address Collection
 
 Collect:
+
 - Required: email, name, address, city, state/zip, country
 - Optional: phone.
 
 **Key ecommerce considerations:**
+
 - Email placement: First if guest checkout (identifies customer)
 - Country placement: Early if shipping methods vary by country (affects available shipping)
 - Phone: Optional to reduce friction, but recommended for delivery coordination
 - Billing address: "Same as shipping" checkbox (default checked)
 
 **For Medusa backends:**
+
 - Country dropdown: Show only countries from cart's region (don't show all countries globally)
 - Get countries from: `cart.region.countries` or `sdk.store.region.retrieve(cart.region_id)`
 - Medusa regions contain specific countries - limiting options ensures correct pricing and shipping
@@ -231,6 +249,7 @@ Collect:
 ### Shipping Method Selection
 
 **Fetch from backend after address provided** (shipping methods vary by address/region):
+
 - Display as radio buttons with cost + delivery estimate
 - Update order total immediately when method changes
 - Highlight free shipping if available
@@ -246,18 +265,20 @@ Collect:
 Payment methods vary by store configuration (backend settings). NEVER assume which payment methods are available or hardcode payment options. Users MUST be able to choose their preferred payment method.
 
 **Fetch available methods from backend:**
+
 ```typescript
 // ALWAYS fetch payment providers from backend
 // For Medusa:
-const { payment_providers } = await sdk.store.payment.listPaymentProviders()
+const { payment_providers } = await sdk.store.payment.listPaymentProviders();
 
 // For other backends:
 // Change based on the integrated backend
-const paymentMethods = await fetch(`${apiUrl}/payment-methods`)
+const paymentMethods = await fetch(`${apiUrl}/payment-methods`);
 // Returns: card, paypal, apple_pay, google_pay, stripe, etc.
 ```
 
 **Display payment method selection UI:**
+
 - Show all enabled payment providers returned by backend
 - Allow user to select their preferred method (radio buttons or cards)
 - Don't skip selection step - user must actively choose
@@ -265,6 +286,7 @@ const paymentMethods = await fetch(`${apiUrl}/payment-methods`)
 - Common options: Credit/Debit Card, PayPal, Apple Pay, Google Pay, Buy Now Pay Later
 
 **Available payment methods (examples, actual options come from backend):**
+
 - Credit/Debit Card (most common, via Stripe/Braintree/other gateway)
 - PayPal (redirect or in-context)
 - Apple Pay (Safari, iOS only)
@@ -273,6 +295,7 @@ const paymentMethods = await fetch(`${apiUrl}/payment-methods`)
 - Manual payment (bank transfer, cash on delivery - if enabled)
 
 **Why backend fetching is required:**
+
 - Store admin controls which payment providers are enabled
 - Payment methods vary by region, currency, order value
 - Test vs production mode affects available methods
@@ -281,27 +304,30 @@ const paymentMethods = await fetch(`${apiUrl}/payment-methods`)
 **For Medusa backends - Payment flow:**
 
 1. **List available payment providers:**
+
 ```typescript
 const { payment_providers } = await sdk.store.payment.listPaymentProviders({
-  region_id: cart.region_id // Required to get region-specific providers
-})
+  region_id: cart.region_id, // Required to get region-specific providers
+});
 ```
 
 2. **Display providers and allow user to select:**
-Show payment providers as radio buttons or cards. User must actively select one.
+   Show payment providers as radio buttons or cards. User must actively select one.
 
 3. **Initialize payment session after selection:**
+
 ```typescript
 // When user selects a provider
 await sdk.store.payment.initiatePaymentSession(cart, {
-  provider_id: selectedProvider.id // e.g., "pp_stripe_stripe", "pp_system_default"
-})
+  provider_id: selectedProvider.id, // e.g., "pp_stripe_stripe", "pp_system_default"
+});
 
 // Re-fetch cart to get updated payment session data
-const { cart: updatedCart } = await sdk.store.cart.retrieve(cart.id)
+const { cart: updatedCart } = await sdk.store.cart.retrieve(cart.id);
 ```
 
 4. **Render provider-specific UI:**
+
 - Stripe providers (`pp_stripe_*`): Render Stripe Elements card UI
 - Manual payment (`pp_system_default`): No additional UI needed
 - Other providers: Implement according to provider requirements
@@ -309,17 +335,20 @@ const { cart: updatedCart } = await sdk.store.cart.retrieve(cart.id)
 **Important:** Payment provider IDs are returned from the backend (e.g., `pp_stripe_stripe`, `pp_system_manual`). Map these to user-friendly display names in your UI.
 
 **Async payment methods (Medusa v2.17.2+):** some payment methods (bank debits, vouchers, several Klarna/SEPA flows) aren't confirmed during checkout — the provider confirms them later via webhook. Don't design the confirmation step to assume payment succeeded the moment the order is placed:
+
 - Show a "payment pending" state on the order confirmation page rather than "paid".
 - Never gate order placement on a synchronous payment success response.
 - Tell the customer what happens next (they'll get an email once payment clears).
 
 **Digital wallets (mobile priority):**
+
 - Apple Pay / Google Pay should be prominent on mobile
 - One-click payment (pre-filled shipping)
 - Significantly faster checkout
 - Higher conversion on mobile
 
 **Card payment:**
+
 - Use payment gateway (Stripe Elements, Braintree)
 - Never handle raw card data (PCI compliance)
 - Tokenize card data before submission
@@ -331,6 +360,7 @@ const { cart: updatedCart } = await sdk.store.cart.retrieve(cart.id)
 Cart items, addresses, shipping method/cost, payment method, order total breakdown.
 
 **Key elements:**
+
 - "Edit" link next to each section (returns to step or edits inline)
 - Terms checkbox (if required): "I agree to Terms and Conditions"
 - Place Order button: Large (48-56px), shows total, loading state on submit
@@ -343,10 +373,12 @@ Cart items, addresses, shipping method/cost, payment method, order total breakdo
 ## Backend Integration
 
 **Address validation (optional):**
+
 - Use address lookup APIs (Google, SmartyStreets) for higher accuracy
 - Tradeoff: accuracy vs friction. Consider for high-value orders.
 
 **Payment processing flow:**
+
 1. Frontend tokenizes payment (Stripe Elements, Braintree)
 2. Send token + order details to backend
 3. Backend authorizes/captures payment & creates order
@@ -384,24 +416,26 @@ Cart items, addresses, shipping method/cost, payment method, order total breakdo
    - Show order details, tracking info, confirmation
 
 **Pattern:**
+
 ```typescript
 // After successful order placement
 async function onOrderSuccess(order) {
   // 1. Clear cart state
-  setCart(null) // or clearCart() from context
+  setCart(null); // or clearCart() from context
 
   // 2. Clear localStorage
-  localStorage.removeItem('cart_id')
+  localStorage.removeItem("cart_id");
 
   // 3. Invalidate queries (if using TanStack Query)
-  queryClient.invalidateQueries({ queryKey: ['cart'] })
+  queryClient.invalidateQueries({ queryKey: ["cart"] });
 
   // 4. Redirect to confirmation
-  router.push(`/order-confirmation/${order.id}`)
+  router.push(`/order-confirmation/${order.id}`);
 }
 ```
 
 **Why this is critical:**
+
 - Without clearing cart state, cart popup shows old items after order
 - User sees "phantom cart" if they click cart icon after checkout
 - Creates confusion and poor UX
@@ -410,6 +444,7 @@ async function onOrderSuccess(order) {
 ## Mobile Checkout
 
 **Key optimizations:**
+
 - Digital wallets prominent (Apple Pay/Google Pay) - significantly faster checkout
 - Single-column layout, 44-48px touch targets
 - Appropriate keyboard types, autocomplete attributes enabled
@@ -422,17 +457,20 @@ async function onOrderSuccess(order) {
 ## Trust and Conversion Optimization
 
 **Trust signals (critical for conversion):**
+
 - "Secure Checkout" badge, payment provider logos (Visa, Mastercard)
 - Return policy link visible, customer support contact
 - Near Place Order: "100% secure checkout", guarantees/free returns if offered
 - For new brands: Customer review count, social proof
 
 **Reduce abandonment:**
+
 - Progress indicator (shows steps remaining)
 - Auto-save form data, clear pricing (no surprise fees)
 - Minimal required fields, smart defaults, autocomplete enabled
 
 **Reduce perceived friction:**
+
 - "No account required" (guest checkout)
 - "Free shipping" highlighted
 - Time estimate: "Less than 2 minutes"
@@ -440,16 +478,19 @@ async function onOrderSuccess(order) {
 ## Error Handling
 
 **Form validation:**
+
 - Validate on blur, show error below field
 - User-friendly messages ("Please enter a valid email address")
 - Scroll to first error on submit
 
 **Payment errors:**
+
 - Card declined: "Your card was declined. Please try another payment method."
 - Keep form data, suggest alternatives (try another card, PayPal)
 - Network timeout: Show retry option without re-entering data
 
 **Stock availability errors:**
+
 - Out of stock: Remove item, recalculate, allow continue with remaining items
 - Quantity reduced: Update automatically, show message, allow continue
 

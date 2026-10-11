@@ -19,6 +19,7 @@ A wishlist (also called favorites or save for later) allows customers to save pr
 ### Key Ecommerce Benefits
 
 **Why wishlists matter:**
+
 - Increase return visits (users come back to check wishlist)
 - Reduce cart abandonment (save for later instead of abandoning)
 - Gift planning (save items for gift lists, share with others)
@@ -26,6 +27,7 @@ A wishlist (also called favorites or save for later) allows customers to save pr
 - Engagement metric (shows product interest for analytics)
 
 **Conversion impact:**
+
 - Users with wishlists have 2-3x higher lifetime value
 - Wishlist-to-purchase conversion: 20-30% on average
 - Email reminders about wishlist items: 15-25% click-through rate
@@ -35,6 +37,7 @@ A wishlist (also called favorites or save for later) allows customers to save pr
 **CRITICAL: Only implement wishlist UI if your ecommerce backend supports wishlist functionality.**
 
 Before implementing:
+
 1. **Check backend API** - Verify wishlist endpoints exist (or ask user)
 2. **Authentication** - Confirm if login required for wishlist storage
 3. **Test operations** - Verify add/remove/fetch functionality works
@@ -44,6 +47,7 @@ Medusa core doesn't include wishlist by default. Install the Wishlist plugin fro
 
 **General backends:**
 Wishlist typically requires user authentication. API endpoints needed:
+
 - GET /wishlist (fetch user's wishlist)
 - POST /wishlist (add item)
 - DELETE /wishlist/{id} (remove item)
@@ -56,11 +60,13 @@ Don't implement the feature. localStorage-only wishlist creates poor UX (lost on
 ### Design and States
 
 **Heart icon** (universal symbol):
+
 - Outline heart: Not in wishlist
 - Filled heart: In wishlist
 - 24-32px on product cards, 32-40px on product page
 
 **Colors:**
+
 - Outline: Gray or black
 - Filled: Red, pink, or brand color
 - High contrast against product image
@@ -78,6 +84,7 @@ Near "Add to Cart" button, or above product image, or with sharing options. Opti
 ### Adding to Wishlist
 
 **Flow:**
+
 1. User clicks heart icon
 2. Show loading state briefly
 3. Send API request to add item
@@ -121,6 +128,7 @@ Similar to product listing page. Product cards with images, titles, current pric
 ### Product Card Information
 
 Display per item:
+
 - Product image (linked to product page)
 - Product title (linked)
 - Current price (may show sale price if on sale now)
@@ -136,6 +144,7 @@ Display per item:
 "Add to Cart" button on each item. Adds item to cart **without removing from wishlist** (user may want both). Success toast: "Added to cart". Don't navigate away (stay on wishlist page).
 
 **Tradeoff:**
+
 - **Keep in wishlist** (recommended): User tracks desired items, can reorder easily
 - **Move to cart**: Removes from wishlist after adding - simpler but limits reordering
 
@@ -149,6 +158,7 @@ If out of stock, disable "Add to Cart" and show "Notify me when back in stock" o
 **Require login (Recommended):**
 
 **Why:**
+
 - Wishlist requires persistent storage across devices
 - Enables email reminders and price drop notifications
 - Better user experience (never lost)
@@ -159,6 +169,7 @@ If out of stock, disable "Add to Cart" and show "Notify me when back in stock" o
 Click wishlist → Show login prompt modal: "Log in to save your wishlist". Include "Sign Up" button. Clear benefit: "Save items across all your devices".
 
 **localStorage approach (Not Recommended):**
+
 - Device-specific only (lost on device switch)
 - Lost if user clears browser data
 - No remarketing opportunities

@@ -30,12 +30,14 @@ Footer provides supplementary navigation, company info, and trust signals. Appea
 ### Must-Have Content
 
 **Required:**
+
 - Navigation links (categories from backend)
 - Contact information (email, phone)
 - Legal links (Privacy Policy, Terms of Service)
 - Copyright notice with current year
 
 **Strongly recommended:**
+
 - Newsletter signup form
 - Payment method badges
 - Social media links
@@ -44,6 +46,7 @@ Footer provides supplementary navigation, company info, and trust signals. Appea
 ### Multi-Column Layout (Desktop)
 
 **Standard pattern: 4-5 columns**
+
 - Column 1: Shop/Categories (dynamic from backend)
 - Column 2: Customer Service (Contact, FAQ, Shipping)
 - Column 3: Company (About, Careers)
@@ -55,11 +58,13 @@ Footer provides supplementary navigation, company info, and trust signals. Appea
 **CRITICAL: Fetch categories from backend dynamically** - never hardcode. Fetch from ecommerce backend API (for Medusa: `sdk.store.category.list()`).
 
 **Benefits:**
+
 - Stays in sync with main navigation
 - Categories added/removed automatically
 - No manual footer updates
 
 **Guidelines:**
+
 - Show top-level categories only (5-8 max)
 - Match labels from main navigation
 - Cache category data (rarely changes)
@@ -67,6 +72,7 @@ Footer provides supplementary navigation, company info, and trust signals. Appea
 ## Newsletter Signup
 
 **Essential elements:**
+
 - Email input + submit button ("Subscribe")
 - **Value proposition (CRITICAL)**: State clear benefit ("Get 10% off your first order", "Exclusive deals + early access"). Don't just say "Subscribe to newsletter".
 - Privacy note: "We respect your privacy" + link to privacy policy

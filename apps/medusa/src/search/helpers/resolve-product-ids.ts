@@ -1,7 +1,4 @@
-import type {
-  RemoteQueryFunction,
-  SearchTypes,
-} from "@medusajs/framework/types";
+import type { RemoteQueryFunction, SearchTypes } from "@medusajs/framework/types";
 
 const RESOLVE_BATCH_SIZE = 200;
 
@@ -32,9 +29,7 @@ async function relatedProductIds(
     withDeleted,
   });
 
-  return (data as Record<string, any>[])
-    .flatMap(pick)
-    .filter((id): id is string => Boolean(id));
+  return (data as Record<string, any>[]).flatMap(pick).filter((id): id is string => Boolean(id));
 }
 
 /**
