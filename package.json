@@ -22,6 +22,8 @@
     "user:medusa": "bun --filter @puppin/medusa user",
     "check": "bun --filter @puppin/web check",
     "test": "bun test",
+    "test:medusa": "bun --filter @puppin/medusa test",
+    "test:web": "bun --filter @puppin/web test",
     "lint": "oxlint",
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt --check .",
