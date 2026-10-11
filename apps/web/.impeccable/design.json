@@ -1,0 +1,260 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-11T15:18:24.556083+00:00",
+  "title": "Design System: Puppin",
+  "extensions": {
+    "colorMeta": {
+      "puppin-red": {
+        "role": "primary",
+        "displayName": "Puppin Red",
+        "canonical": "#d63a2c",
+        "tonalRamp": [
+          "#3d0f0b",
+          "#651912",
+          "#8f2419",
+          "#b42c20",
+          "#d63a2c",
+          "#e56a5f",
+          "#f0a49d",
+          "#fadcd9"
+        ]
+      },
+      "puppin-red-deep": {
+        "role": "primary",
+        "displayName": "Puppin Red Deep",
+        "canonical": "#b42c20"
+      },
+      "sprout-mint": {
+        "role": "secondary",
+        "displayName": "Sprout Mint",
+        "canonical": "#c8e6d6",
+        "tonalRamp": [
+          "#0f2a1d",
+          "#1b4430",
+          "#24583c",
+          "#3c7a58",
+          "#6aa588",
+          "#9ccdb3",
+          "#c8e6d6",
+          "#eaf6ef"
+        ]
+      },
+      "sprout-deep": {
+        "role": "secondary",
+        "displayName": "Sprout Deep",
+        "canonical": "#24583c"
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#121212",
+        "tonalRamp": [
+          "#121212",
+          "#2a2a29",
+          "#4a4a48",
+          "#6e6e6b",
+          "#94948f",
+          "#bdbdb8",
+          "#e4e4e0",
+          "#f4f4f2"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Ink Soft",
+        "canonical": "#4a4a48"
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#ffffff"
+      },
+      "mist": {
+        "role": "neutral",
+        "displayName": "Mist",
+        "canonical": "#f4f4f2"
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Line",
+        "canonical": "#e4e4e0"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero headline, full panel width, one red word."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section heads (NEW IN, MADE BY US)."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Product names."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Intro and story copy, max ~34rem."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Chips, small heads."
+      }
+    },
+    "shadows": [
+      {
+        "name": "tag-lift",
+        "value": "0 18px 40px -18px rgb(47 107 74 / 0.45)",
+        "purpose": "Hero quick-add card on mint."
+      },
+      {
+        "name": "menu",
+        "value": "0 12px 32px -8px rgb(18 18 18 / 0.18)",
+        "purpose": "Country dropdown."
+      },
+      {
+        "name": "puppin-ground",
+        "value": "drop-shadow(0 24px 24px rgb(36 88 60 / 0.22))",
+        "purpose": "Under the hero Puppin cutout on mint."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Tile image zoom and the Puppin hop."
+      },
+      {
+        "name": "puppin-hop",
+        "value": "620ms squash-and-stretch on add to cart",
+        "purpose": "The one authored motion moment; off under reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The red action. Add to cart and other primary actions.",
+      "html": "<button class=\"ds-btn-primary\">Add to cart</button>",
+      "css": ".ds-btn-primary{background:#d63a2c;color:#fff;font-family:'Anuphan Variable',system-ui,sans-serif;font-weight:600;font-size:16px;padding:12px 24px;min-height:50px;border:0;border-radius:9999px;cursor:pointer;transition:background-color .15s ease-out,transform .15s ease-out}.ds-btn-primary:hover{background:#b42c20}.ds-btn-primary:active{transform:scale(.98)}.ds-btn-primary:focus-visible{outline:2px solid #d63a2c;outline-offset:3px}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Quiet bordered pill.",
+      "html": "<button class=\"ds-btn-secondary\">View cart</button>",
+      "css": ".ds-btn-secondary{background:#fff;color:#121212;font-family:'Anuphan Variable',system-ui,sans-serif;font-weight:600;font-size:14px;padding:10px 20px;min-height:44px;border:2px solid #e4e4e0;border-radius:9999px;cursor:pointer;transition:border-color .15s,background-color .15s}.ds-btn-secondary:hover{border-color:#121212;background:#f4f4f2}.ds-btn-secondary:focus-visible{outline:2px solid #d63a2c;outline-offset:3px}"
+    },
+    {
+      "name": "Option Chips",
+      "kind": "chip",
+      "refersTo": "option-chip",
+      "description": "Variant picker; radio inside a pill label.",
+      "html": "<div class=\"ds-chips\"><label class=\"ds-chip\"><input type=\"radio\" name=\"v\">S / White</label><label class=\"ds-chip ds-chip-on\"><input type=\"radio\" name=\"v\" checked>M / White</label><label class=\"ds-chip\"><input type=\"radio\" name=\"v\">L / Black</label></div>",
+      "css": ".ds-chips{display:flex;gap:8px;flex-wrap:wrap}.ds-chip{font-family:'Anuphan Variable',system-ui,sans-serif;font-size:14px;font-weight:600;color:#121212;border:2px solid #e4e4e0;border-radius:9999px;padding:6px 14px;cursor:pointer}.ds-chip input{position:absolute;opacity:0;width:0;height:0}.ds-chip:hover{border-color:#121212}.ds-chip-on{background:#121212;border-color:#121212;color:#fff}.ds-chip:has(input:focus-visible){outline:2px solid #d63a2c;outline-offset:2px}"
+    },
+    {
+      "name": "Display Headline",
+      "kind": "custom",
+      "refersTo": "display",
+      "description": "Full-measure condensed caps with one red word.",
+      "html": "<h1 class=\"ds-display\">Cute brand.<br><span>Serious</span> clothes.</h1>",
+      "css": ".ds-display{font-family:'Anybody Variable','Kanit',sans-serif;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.88;letter-spacing:-.01em;font-size:72px;color:#121212;margin:0}.ds-display span{color:#d63a2c}"
+    },
+    {
+      "name": "Product Tile",
+      "kind": "card",
+      "refersTo": "product-tile",
+      "description": "4:5 mist tile, title and price below.",
+      "html": "<a class=\"ds-tile\" href=\"#\"><div class=\"ds-tile-img\"></div><div class=\"ds-tile-row\"><span class=\"ds-tile-title\">Medusa T-Shirt</span><span class=\"ds-tile-price\">€10.00</span></div></a>",
+      "css": ".ds-tile{display:flex;flex-direction:column;gap:12px;width:220px;text-decoration:none;color:#121212;font-family:'Anuphan Variable',system-ui,sans-serif}.ds-tile-img{aspect-ratio:4/5;background:#f4f4f2;border-radius:16px}.ds-tile-row{display:flex;justify-content:space-between;gap:12px;padding:0 4px;font-weight:600}.ds-tile-price{font-variant-numeric:tabular-nums}.ds-tile:hover .ds-tile-title{text-decoration:underline;text-decoration-thickness:2px}"
+    },
+    {
+      "name": "Hero Quick-Add",
+      "kind": "custom",
+      "refersTo": "hero-panel",
+      "description": "White card on the mint panel: name, price, chips, red action.",
+      "html": "<div class=\"ds-hero\"><div class=\"ds-qa\"><div class=\"ds-qa-top\"><b>Medusa T-Shirt</b><b>€10.00</b></div><button class=\"ds-qa-btn\">Add to cart</button></div></div>",
+      "css": ".ds-hero{background:#c8e6d6;border-radius:28px;padding:32px}.ds-qa{background:#fff;border-radius:16px;padding:24px;max-width:420px;box-shadow:0 18px 40px -18px rgb(47 107 74 / .45);font-family:'Anuphan Variable',system-ui,sans-serif;color:#121212}.ds-qa-top{display:flex;justify-content:space-between;font-size:20px}.ds-qa-btn{margin-top:20px;width:100%;min-height:50px;border:0;border-radius:9999px;background:#d63a2c;color:#fff;font-weight:600;font-size:16px;cursor:pointer}.ds-qa-btn:hover{background:#b42c20}.ds-qa-btn:focus-visible{outline:2px solid #d63a2c;outline-offset:3px}"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "description": "Sticky white bar, wordmark, quiet links, red cart badge.",
+      "html": "<nav class=\"ds-nav\"><b class=\"ds-nav-mark\">Puppin</b><a href=\"#\">Shop All</a><a href=\"#\">Shirts</a><span class=\"ds-nav-cart\">Cart<i>2</i></span></nav>",
+      "css": ".ds-nav{display:flex;align-items:center;gap:28px;height:64px;padding:0 24px;background:#fff;border-bottom:1px solid #e4e4e0;font-family:'Anuphan Variable',system-ui,sans-serif}.ds-nav-mark{font-family:'Anybody Variable',sans-serif;font-weight:900;font-stretch:62%;text-transform:uppercase;font-size:28px}.ds-nav a{color:#4a4a48;text-decoration:none;font-size:15px}.ds-nav a:hover{color:#121212}.ds-nav-cart{margin-left:auto;position:relative}.ds-nav-cart i{font-style:normal;position:absolute;top:-10px;right:-14px;background:#d63a2c;color:#fff;border-radius:9999px;font-size:11px;font-weight:700;padding:1px 6px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Fuzzy Inspector",
+    "overview": "Puppin works like a clean own-label clothing store: white page, a product grid, a clear red action. A red plush creature with a rainbow sprout shows up wherever the page needs warmth. The structure is the category standard on purpose. The personality comes from two things: full-measure condensed uppercase headlines that fill the width like label tape, and Puppin himself, rendered as a 3D plush who hugs, peeks over, measures, and naps on the layout.\n\nThe character is the main character (a brand commitment in PRODUCT.md). He appears as generated plush renders matched to the character sheets in `.impeccable/refs/`, never as vector doodles, emoji, or a recoloured variant. Humour lives in the copy and in his poses; the commerce parts (prices, options, cart) stay plain and legible.",
+    "keyCharacteristics": [
+      "White ground, ink type, one red action colour.",
+      "Huge condensed caps headlines with exactly one word in Puppin red.",
+      "Puppin as plush renders at section edges: hug (hero), peek (over a rule), measure (story), nap (footer).",
+      "Pill controls, 16px tiles, 28px hero panel.",
+      "Thai and English set side by side; Thai lines carry `lang=\"th\"`."
+    ],
+    "rules": [
+      {
+        "name": "The One Red Word Rule",
+        "body": "Each display headline sets exactly one word in Puppin Red; the rest is ink. Product-name headings on the product page are catalog data and stay all ink.",
+        "section": "colors"
+      },
+      {
+        "name": "The Full-Measure Rule",
+        "body": "Display and headline type is set large enough to own the width of its container. A small condensed headline is a misuse.",
+        "section": "typography"
+      },
+      {
+        "name": "The Display Ceiling Exception",
+        "body": "These headlines intentionally exceed the usual 6rem display ceiling; the user asked for the Label Room's full-measure heading style.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Elevation Rule",
+        "body": "A surface uses either a hairline border or a shadow, never both.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Cutout Rule",
+        "body": "Every character render ships as a transparent cutout (generated on pure white with no floor or shadow, then cut with magick), so Puppin sits on any ground without a visible rectangle. Depth under him comes from a CSS `drop-shadow`, never a baked-in shadow.",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "**Do** generate every new Puppin pose with agy from the two character sheets, and embed the prompt as provenance (`impeccable embed-prompt`).",
+      "**Do** ship every render as a transparent cutout (The Cutout Rule), and check it against the sheets for the mouth with fang, the brows, and soft peach-orange cheeks (see `.impeccable/refs/puppin-cheek-ref.png`).",
+      "**Do** keep one red word per display headline, and Puppin Red as the only action colour.",
+      "**Do** set Thai copy with `lang=\"th\"` and let it fall to Kanit or Anuphan."
+    ],
+    "donts": [
+      "**Don't** redraw, recolour, or add features to Puppin, or stand in vector doodles or emoji for him.",
+      "**Don't** put a kicker or eyebrow label above headings.",
+      "**Don't** invent quality claims, reviews, or shipping promises; PRODUCT.md lists none.",
+      "**Don't** set display type small or in a system face."
+    ]
+  }
+}

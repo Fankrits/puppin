@@ -22,3 +22,13 @@ export async function getRegion(id: string): Promise<HttpTypes.StoreRegion | nul
     return null;
   }
 }
+
+/** The region serving a country code, falling back to the first region. */
+export function findRegionForCountry(regions: HttpTypes.StoreRegion[], countryCode: string) {
+  const code = countryCode.toLowerCase();
+  return (
+    regions.find((r) => r.countries?.some((c) => c.iso_2?.toLowerCase() === code)) ??
+    regions[0] ??
+    null
+  );
+}
