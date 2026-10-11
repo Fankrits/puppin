@@ -23,13 +23,18 @@ bun run dev:web      # Start web app (TanStack Start, port 3000)
 bun run dev:medusa   # Start Medusa backend (port 9000)
 ```
 
-# Database (Podman / Docker)
+# Infrastructure & Database (Podman / Docker)
 
-The project includes a `docker-compose.yml` for PostgreSQL 16 and Redis 7 compatible with both Podman and Docker:
+The project includes a `docker-compose.yml` for **PostgreSQL 16**, **Redis 7**, and **MinIO S3** (object bucket storage for media/uploads), compatible with both Podman and Docker:
+
+- **PostgreSQL**: `localhost:5432` (`postgres:postgres`, DB: `medusa-puppin`)
+- **Redis**: `localhost:6379`
+- **MinIO S3 API**: `http://localhost:9002` (Bucket: `medusa-media`)
+- **MinIO Web Console**: `http://localhost:9001` (User: `minioadmin`, Password: `minioadminpassword`)
 
 ```bash
-bun run db:up        # Start PostgreSQL & Redis in the background (podman compose up -d)
-bun run db:down      # Stop database containers (podman compose down)
+bun run db:up        # Start PostgreSQL, Redis, and MinIO S3 in the background (podman compose up -d)
+bun run db:down      # Stop all infrastructure containers (podman compose down)
 bun run db:migrate   # Run Medusa database migrations
 bun run db:setup     # Setup database and sync links
 ```
