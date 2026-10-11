@@ -4,7 +4,16 @@ import { formatPrice } from "../../lib/utils/price";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { useState } from "react";
-import { ShieldCheck, ArrowLeft } from "lucide-react";
+import { ShieldCheck, ArrowLeft, AlertCircle } from "lucide-react";
+import type { HttpTypes } from "@medusajs/types";
+import {
+  updateCartAddresses,
+  listCartShippingOptions,
+  setCartShippingMethod,
+  listPaymentProviders,
+  initiatePaymentSession,
+  completeCart,
+} from "../../lib/data/checkout";
 
 export const Route = createFileRoute("/$countryCode/checkout")({
   component: CheckoutPage,
@@ -13,46 +22,148 @@ export const Route = createFileRoute("/$countryCode/checkout")({
 function CheckoutPage() {
   const { countryCode } = Route.useParams();
   const navigate = useNavigate();
-  const { cart, totalItems } = useCart();
-  const currencyCode = cart?.currency_code || "usd";
+  const { cart, totalItems, setCartData, refreshCart } = useCart();
+  const currencyCode = cart?.currency_code || "eur";
 
   const [step, setStep] = useState<"address" | "delivery" | "payment">("address");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Form states
+  // Shipping & Payment backend state
+  const [shippingOptions, setShippingOptions] = useState<HttpTypes.StoreCartShippingOption[]>([]);
+  const [selectedShippingOptionId, setSelectedShippingOptionId] = useState<string | null>(null);
+  const [paymentProviders, setPaymentProviders] = useState<HttpTypes.StorePaymentProvider[]>([]);
+  const [selectedProviderId, setSelectedProviderId] = useState<string | null>(null);
+
+  // Address form fields pre-filled from existing cart addresses
   const [formData, setFormData] = useState({
-    email: "",
-    firstName: "",
-    lastName: "",
-    address: "",
-    city: "",
-    postalCode: "",
-    country: countryCode.toUpperCase(),
+    email: cart?.email || "",
+    firstName: cart?.shipping_address?.first_name || "",
+    lastName: cart?.shipping_address?.last_name || "",
+    address: cart?.shipping_address?.address_1 || "",
+    city: cart?.shipping_address?.city || "",
+    postalCode: cart?.shipping_address?.postal_code || "",
+    country: (cart?.shipping_address?.country_code || countryCode).toUpperCase(),
+    phone: cart?.shipping_address?.phone || "",
   });
 
-  const handleAddressSubmit = (e: React.FormEvent) => {
+  // Step 1: Submit Address to Medusa backend
+  const handleAddressSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStep("delivery");
-  };
+    if (!cart?.id) return;
 
-  const handleDeliverySubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setStep("payment");
-  };
-
-  const handleCompleteOrder = async () => {
     setIsSubmitting(true);
-    // In demo / starter flow, proceed to confirmation
-    setTimeout(() => {
-      setIsSubmitting(false);
-      void navigate({
-        to: "/$countryCode/order/$orderId/confirmed",
-        params: {
-          countryCode,
-          orderId: cart?.id ? `ord_${cart.id.slice(-6)}` : "ord_demo123",
+    setErrorMessage(null);
+
+    try {
+      const updatedCart = await updateCartAddresses({
+        cartId: cart.id,
+        email: formData.email,
+        shippingAddress: {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          address_1: formData.address,
+          city: formData.city,
+          postal_code: formData.postalCode,
+          country_code: formData.country.toLowerCase(),
+          phone: formData.phone || undefined,
         },
       });
-    }, 1200);
+
+      setCartData(updatedCart);
+
+      // Fetch live shipping options from Medusa backend
+      const options = await listCartShippingOptions(cart.id);
+      setShippingOptions(options);
+
+      // Pre-select existing or first option
+      const existingSelected = updatedCart.shipping_methods?.[0]?.shipping_option_id;
+      if (existingSelected) {
+        setSelectedShippingOptionId(existingSelected);
+      } else if (options.length > 0) {
+        setSelectedShippingOptionId(options[0].id);
+      }
+
+      setStep("delivery");
+    } catch (err: unknown) {
+      console.error("Failed to save address:", err);
+      setErrorMessage(err instanceof Error ? err.message : "Failed to save address to cart");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Step 2: Select and save shipping method to Medusa backend
+  const handleDeliverySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cart?.id || !selectedShippingOptionId) return;
+
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      const updatedCart = await setCartShippingMethod({
+        cartId: cart.id,
+        shippingOptionId: selectedShippingOptionId,
+      });
+
+      setCartData(updatedCart);
+
+      // Fetch live payment providers from Medusa backend
+      if (updatedCart.region_id) {
+        const providers = await listPaymentProviders(updatedCart.region_id);
+        setPaymentProviders(providers);
+        if (providers.length > 0) {
+          setSelectedProviderId(providers[0].id);
+        }
+      }
+
+      setStep("payment");
+    } catch (err: unknown) {
+      console.error("Failed to select shipping method:", err);
+      setErrorMessage(err instanceof Error ? err.message : "Failed to set shipping method");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Step 3: Initiate payment session & complete the order in Medusa
+  const handleCompleteOrder = async () => {
+    if (!cart?.id || !selectedProviderId) return;
+
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      // 1. Initialize payment session with selected provider
+      await initiatePaymentSession({
+        cart,
+        providerId: selectedProviderId,
+      });
+
+      // 2. Complete cart and create real Medusa order
+      const result = await completeCart(cart.id);
+
+      if (result.order?.id) {
+        await refreshCart();
+        void navigate({
+          to: "/$countryCode/order/$orderId/confirmed",
+          params: {
+            countryCode,
+            orderId: result.order.id,
+          },
+        });
+      } else if (result.error) {
+        setErrorMessage(result.error);
+      } else {
+        setErrorMessage("Order creation failed. Please verify your details.");
+      }
+    } catch (err: unknown) {
+      console.error("Failed to complete order:", err);
+      setErrorMessage(err instanceof Error ? err.message : "Payment and order completion failed");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (totalItems === 0) {
@@ -80,6 +191,13 @@ function CheckoutPage() {
         </Link>
         <h1 className="text-3xl font-bold tracking-tight text-neutral-900 mt-2">Checkout</h1>
       </div>
+
+      {errorMessage && (
+        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 flex items-center gap-3 text-sm text-red-700">
+          <AlertCircle className="h-5 w-5 flex-shrink-0 text-red-500" />
+          <span>{errorMessage}</span>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         {/* Checkout Steps Form */}
@@ -140,20 +258,20 @@ function CheckoutPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <Input
                     label="City"
-                    placeholder="San Francisco"
+                    placeholder="Copenhagen"
                     isRequired
                     value={formData.city}
                     onChange={(val) => setFormData((p) => ({ ...p, city: val }))}
                   />
                   <Input
                     label="Postal code"
-                    placeholder="94101"
+                    placeholder="1000"
                     isRequired
                     value={formData.postalCode}
                     onChange={(val) => setFormData((p) => ({ ...p, postalCode: val }))}
                   />
                 </div>
-                <Button type="submit" size="lg" className="w-full mt-4">
+                <Button type="submit" size="lg" isLoading={isSubmitting} className="w-full mt-4">
                   Continue to Delivery
                 </Button>
               </form>
@@ -192,24 +310,59 @@ function CheckoutPage() {
 
             {step === "delivery" && (
               <form onSubmit={handleDeliverySubmit} className="space-y-4">
-                <div className="rounded-xl border border-neutral-300 p-4 flex items-center justify-between bg-neutral-50/50">
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="radio"
-                      id="standard-shipping"
-                      defaultChecked
-                      className="h-4 w-4 text-neutral-900 focus:ring-neutral-900"
-                    />
-                    <label
-                      htmlFor="standard-shipping"
-                      className="text-sm font-medium text-neutral-900"
-                    >
-                      Standard Delivery (3-5 business days)
-                    </label>
+                {shippingOptions.length === 0 ? (
+                  <p className="text-sm text-neutral-500 py-2">
+                    Loading shipping options from Medusa backend...
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {shippingOptions.map((opt) => (
+                      <label
+                        key={opt.id}
+                        className={`flex items-center justify-between rounded-xl border p-4 cursor-pointer transition-all ${
+                          selectedShippingOptionId === opt.id
+                            ? "border-neutral-900 bg-neutral-50/80 shadow-xs"
+                            : "border-neutral-200 hover:border-neutral-300"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="radio"
+                            name="shipping-option"
+                            value={opt.id}
+                            checked={selectedShippingOptionId === opt.id}
+                            onChange={() => setSelectedShippingOptionId(opt.id)}
+                            className="h-4 w-4 text-neutral-900 focus:ring-neutral-900"
+                          />
+                          <div>
+                            <span className="text-sm font-semibold text-neutral-900 block">
+                              {opt.name}
+                            </span>
+                            {opt.type?.description && (
+                              <span className="text-xs text-neutral-500">
+                                {opt.type.description}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <span className="text-sm font-bold text-neutral-900">
+                          {formatPrice(
+                            opt.calculated_price?.calculated_amount ?? opt.amount ?? 0,
+                            currencyCode,
+                          )}
+                        </span>
+                      </label>
+                    ))}
                   </div>
-                  <span className="text-sm font-semibold text-neutral-900">Free</span>
-                </div>
-                <Button type="submit" size="lg" className="w-full">
+                )}
+
+                <Button
+                  type="submit"
+                  size="lg"
+                  isLoading={isSubmitting}
+                  isDisabled={!selectedShippingOptionId}
+                  className="w-full mt-4"
+                >
                   Continue to Payment
                 </Button>
               </form>
@@ -217,7 +370,8 @@ function CheckoutPage() {
 
             {step === "payment" && (
               <p className="text-xs text-neutral-600">
-                Standard Delivery (3-5 business days) — Free
+                {shippingOptions.find((o) => o.id === selectedShippingOptionId)?.name ||
+                  "Selected shipping method"}
               </p>
             )}
           </div>
@@ -233,20 +387,46 @@ function CheckoutPage() {
 
             {step === "payment" && (
               <div className="space-y-6">
-                <div className="rounded-xl border border-neutral-200 p-4 bg-neutral-50 space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
-                    <ShieldCheck className="h-5 w-5 text-emerald-600" />
-                    Medusa Mock Payment Provider (Test Mode)
-                  </div>
-                  <p className="text-xs text-neutral-500">
-                    Your payment details are simulated securely in this environment.
-                  </p>
+                <div className="space-y-3">
+                  {paymentProviders.map((prov) => (
+                    <label
+                      key={prov.id}
+                      className={`flex items-center gap-3 rounded-xl border p-4 cursor-pointer transition-all ${
+                        selectedProviderId === prov.id
+                          ? "border-neutral-900 bg-neutral-50/80 shadow-xs"
+                          : "border-neutral-200 hover:border-neutral-300"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="payment-provider"
+                        value={prov.id}
+                        checked={selectedProviderId === prov.id}
+                        onChange={() => setSelectedProviderId(prov.id)}
+                        className="h-4 w-4 text-neutral-900 focus:ring-neutral-900"
+                      />
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck className="h-5 w-5 text-emerald-600" />
+                        <div>
+                          <span className="text-sm font-semibold text-neutral-900 block">
+                            {prov.id === "pp_system_default"
+                              ? "Standard Payment / Manual Provider"
+                              : prov.id}
+                          </span>
+                          <span className="text-xs text-neutral-500">
+                            Processed securely through Medusa payment engine
+                          </span>
+                        </div>
+                      </div>
+                    </label>
+                  ))}
                 </div>
 
                 <Button
                   size="xl"
                   onClick={handleCompleteOrder}
                   isLoading={isSubmitting}
+                  isDisabled={!selectedProviderId}
                   className="w-full text-base font-semibold"
                 >
                   Complete Order ({formatPrice(cart?.total || cart?.subtotal, currencyCode)})
@@ -293,8 +473,20 @@ function CheckoutPage() {
               </div>
               <div className="flex justify-between text-neutral-600">
                 <span>Shipping</span>
-                <span className="font-semibold text-emerald-600">Free</span>
+                <span className="font-semibold text-neutral-900">
+                  {cart?.shipping_total
+                    ? formatPrice(cart.shipping_total, currencyCode)
+                    : "Calculated at next step"}
+                </span>
               </div>
+              {cart?.tax_total ? (
+                <div className="flex justify-between text-neutral-600">
+                  <span>Taxes</span>
+                  <span className="font-semibold text-neutral-900">
+                    {formatPrice(cart.tax_total, currencyCode)}
+                  </span>
+                </div>
+              ) : null}
               <div className="border-t border-neutral-100 pt-2 flex justify-between text-base font-bold text-neutral-900">
                 <span>Total</span>
                 <span>{formatPrice(cart?.total || cart?.subtotal, currencyCode)}</span>

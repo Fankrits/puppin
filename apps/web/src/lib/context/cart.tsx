@@ -20,6 +20,8 @@ interface CartContextType {
   addItem: (variantId: string, quantity?: number) => Promise<void>;
   updateItemQuantity: (lineItemId: string, quantity: number) => Promise<void>;
   removeItem: (lineItemId: string) => Promise<void>;
+  refreshCart: () => Promise<void>;
+  setCartData: (cart: HttpTypes.StoreCart | null) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -126,6 +128,12 @@ export function CartProvider({
     },
     removeItem: async (lineItemId: string) => {
       await removeMutation.mutateAsync({ lineItemId });
+    },
+    refreshCart: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+    setCartData: (newCart: HttpTypes.StoreCart | null) => {
+      queryClient.setQueryData(["cart", regionId], newCart);
     },
   };
 
