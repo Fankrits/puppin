@@ -1,21 +1,49 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
-import { getProductByHandle } from "../../../lib/data/products";
+import { useState } from "react";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import type { HttpTypes } from "@medusajs/types";
+import { Check } from "lucide-react";
+import { getProductByHandle, listProducts } from "../../../lib/data/products";
+import { findRegionForCountry, listRegions } from "../../../lib/data/regions";
 import { formatPrice } from "../../../lib/utils/price";
+import {
+  findVariant,
+  isInStock,
+  isValueAvailable,
+  selectValue,
+  type Selection,
+} from "../../../lib/utils/variants";
 import { useCart } from "../../../lib/context/cart";
+import { cn } from "../../../lib/utils/cn";
 import { Button } from "../../../components/ui/button";
-import { Badge } from "../../../components/ui/badge";
-import { useState, useMemo } from "react";
-import { ShoppingBag, ShieldCheck, Truck, RefreshCw } from "lucide-react";
+import { OptionChip } from "../../../components/ui/chip";
+import { ProductCard } from "../../../components/product-card";
 
 export const Route = createFileRoute("/$countryCode/products/$handle")({
   loader: async ({ params, context }) => {
     const { countryCode, handle } = params;
     const { queryClient } = context;
 
-    const product = await queryClient.ensureQueryData({
-      queryKey: ["product", handle, countryCode],
-      queryFn: () => getProductByHandle(handle),
+    const regions = await queryClient.ensureQueryData({
+      queryKey: ["regions"],
+      queryFn: () => listRegions(),
     });
+    const region = findRegionForCountry(regions, countryCode);
+
+    const [product, related] = await Promise.all([
+      queryClient.ensureQueryData({
+        queryKey: ["product", handle, region?.id],
+        queryFn: () => getProductByHandle(handle, region?.id),
+      }),
+      // Same key as the homepage grid, so the cache is shared
+      queryClient.ensureQueryData({
+        queryKey: ["products", countryCode, region?.id],
+        queryFn: () =>
+          listProducts({
+            regionId: region?.id,
+            queryParams: { fields: "*variants,*variants.calculated_price,*options" },
+          }),
+      }),
+    ]);
 
     if (!product) {
       throw notFound();
@@ -23,225 +51,275 @@ export const Route = createFileRoute("/$countryCode/products/$handle")({
 
     return {
       countryCode,
+      currencyCode: region?.currency_code || "usd",
       product,
+      related: related.products.filter((p) => p.id !== product.id).slice(0, 4),
     };
   },
   component: ProductDetailPage,
+  notFoundComponent: ProductNotFound,
 });
 
+function initialSelection(product: HttpTypes.StoreProduct): Selection {
+  // Preselect only options with a single value; real choices are the shopper's to make
+  const selection: Selection = {};
+  for (const option of product.options ?? []) {
+    if (option.values?.length === 1 && option.values[0].value) {
+      selection[option.id] = option.values[0].value;
+    }
+  }
+  return selection;
+}
+
 function ProductDetailPage() {
-  const { product } = Route.useLoaderData();
-  const { addItem, isLoading: isCartLoading } = useCart();
+  const { countryCode, currencyCode, product, related } = Route.useLoaderData();
+  const { addItem } = useCart();
 
-  // Track selected options e.g. { "Color": "Black", "Size": "M" }
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() => {
-    const initial: Record<string, string> = {};
-    product.options?.forEach((opt) => {
-      if (opt.title && opt.values?.[0]?.value) {
-        initial[opt.title] = opt.values[0].value;
-      }
-    });
-    return initial;
-  });
+  const [selection, setSelection] = useState<Selection>(() => initialSelection(product));
+  const [activeImage, setActiveImage] = useState(0);
+  const [status, setStatus] = useState<"idle" | "adding" | "added" | "error" | "needs-option">(
+    "idle",
+  );
+  const [hop, setHop] = useState(0);
 
-  // Selected image index
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const variant = findVariant(product, selection);
+  const inStock = isInStock(variant);
+  const missing = (product.options ?? []).filter((o) => !selection[o.id]);
 
-  // Find variant matching selected options
-  const matchedVariant = useMemo(() => {
-    if (!product.variants || product.variants.length === 0) return null;
-    if (!product.options || product.options.length === 0) return product.variants[0];
+  // Before a full selection, show the cheapest price as a "from" price
+  const prices = (product.variants ?? [])
+    .map((v) => v.calculated_price?.calculated_amount)
+    .filter((n): n is number => typeof n === "number");
+  const price =
+    variant?.calculated_price?.calculated_amount ?? (prices.length ? Math.min(...prices) : null);
+  const original = variant?.calculated_price?.original_amount;
+  const hasDiscount = variant && original != null && price != null && original > price;
+  const isFromPrice = !variant && new Set(prices).size > 1;
 
-    return (
-      product.variants.find((v) => {
-        // In Medusa v2, variant option values can be in v.options or v.title
-        return Object.entries(selectedOptions).every(([optTitle, optVal]) => {
-          const match = v.options?.some((o) => o.value === optVal || o.option?.title === optTitle);
-          return match || v.title?.includes(optVal);
-        });
-      }) || product.variants[0]
-    );
-  }, [product.variants, product.options, selectedOptions]);
+  const images = product.images?.length
+    ? product.images
+    : product.thumbnail
+      ? [{ id: "thumb", url: product.thumbnail }]
+      : [];
 
-  const calculatedPrice = matchedVariant?.calculated_price?.calculated_amount;
-  const originalPrice = matchedVariant?.calculated_price?.original_amount;
-  const hasDiscount = originalPrice && calculatedPrice && originalPrice > calculatedPrice;
-  const images =
-    product.images && product.images.length > 0
-      ? product.images
-      : product.thumbnail
-        ? [{ url: product.thumbnail }]
-        : [];
-
-  const handleAddToCart = async () => {
-    if (!matchedVariant?.id) return;
-    await addItem(matchedVariant.id, 1);
-  };
+  async function handleAdd() {
+    if (!variant) {
+      setStatus("needs-option");
+      document.querySelector<HTMLInputElement>(`input[name="opt-${missing[0]?.id}"]`)?.focus();
+      return;
+    }
+    setStatus("adding");
+    try {
+      await addItem(variant.id, 1);
+      setStatus("added");
+      setHop((n) => n + 1);
+    } catch {
+      setStatus("error");
+    }
+  }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-        {/* Images Gallery */}
-        <div className="space-y-4">
-          <div className="aspect-square w-full overflow-hidden rounded-2xl bg-neutral-100 border border-neutral-200">
-            {images[activeImageIndex]?.url ? (
+    <div className="pb-8">
+      <div className="mx-auto max-w-[88rem] px-4 pt-2 sm:px-6 lg:px-10 lg:pt-4">
+        <div className="grid gap-8 lg:grid-cols-12 lg:gap-14">
+          {/* Gallery */}
+          <div className="lg:col-span-7 lg:flex lg:items-end lg:gap-4">
+            <div className="relative mt-14 lg:mt-24 lg:flex-1">
               <img
-                src={images[activeImageIndex].url}
-                alt={product.title}
-                className="h-full w-full object-cover object-center"
+                key={hop}
+                src="/images/puppin/peek.webp"
+                alt=""
+                aria-hidden="true"
+                className={cn(
+                  "pointer-events-none absolute right-6 bottom-full z-10 w-20 select-none lg:right-10 lg:w-32",
+                  hop > 0 && "puppin-hop",
+                )}
               />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-neutral-400">
-                No image available
-              </div>
-            )}
-          </div>
-
-          {images.length > 1 && (
-            <div className="flex gap-3 overflow-x-auto pb-2">
-              {images.map((img, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setActiveImageIndex(idx)}
-                  className={`h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all cursor-pointer ${
-                    activeImageIndex === idx
-                      ? "border-neutral-900 ring-2 ring-neutral-900/10"
-                      : "border-neutral-200 opacity-70 hover:opacity-100"
-                  }`}
-                >
+              <div className="relative aspect-[5/4] w-full overflow-hidden rounded-2xl bg-mist lg:aspect-square">
+                {images[activeImage]?.url ? (
                   <img
-                    src={img.url}
-                    alt={`${product.title} thumbnail ${idx + 1}`}
+                    src={images[activeImage].url}
+                    alt={product.title}
                     className="h-full w-full object-cover object-center"
                   />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Product Details & Purchase Form */}
-        <div className="flex flex-col justify-between space-y-8">
-          <div className="space-y-6">
-            <div>
-              {product.collection && (
-                <span className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
-                  {product.collection.title}
-                </span>
-              )}
-              <h1 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl mt-1">
-                {product.title}
-              </h1>
-              {product.subtitle && (
-                <p className="text-base text-neutral-600 mt-2">{product.subtitle}</p>
-              )}
-            </div>
-
-            {/* Price section - CRITICAL: never divide by 100 */}
-            <div className="flex items-baseline gap-3">
-              {calculatedPrice !== undefined && calculatedPrice !== null ? (
-                <>
-                  <span className="text-2xl font-bold text-neutral-900">
-                    {formatPrice(calculatedPrice)}
-                  </span>
-                  {hasDiscount && (
-                    <>
-                      <span className="text-base text-neutral-400 line-through">
-                        {formatPrice(originalPrice)}
-                      </span>
-                      <Badge variant="error" size="sm">
-                        Save {formatPrice(originalPrice - calculatedPrice)}
-                      </Badge>
-                    </>
-                  )}
-                </>
-              ) : (
-                <span className="text-sm text-neutral-500">Price unavailable</span>
-              )}
-            </div>
-
-            {/* Product Options (Variants: Color, Size, etc.) */}
-            {product.options && product.options.length > 0 && (
-              <div className="space-y-5 border-t border-b border-neutral-200 py-6">
-                {product.options.map((option) => (
-                  <div key={option.id} className="space-y-2.5">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-neutral-700">
-                      {option.title}:{" "}
-                      <span className="font-normal text-neutral-900">
-                        {selectedOptions[option.title || ""]}
-                      </span>
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {option.values?.map((val) => {
-                        const isSelected = selectedOptions[option.title || ""] === val.value;
-                        return (
-                          <button
-                            key={val.id}
-                            type="button"
-                            onClick={() => {
-                              if (option.title) {
-                                setSelectedOptions((prev) => ({
-                                  ...prev,
-                                  [option.title!]: val.value || "",
-                                }));
-                              }
-                            }}
-                            className={`min-h-[44px] min-w-[44px] rounded-lg border px-4 py-2 text-sm font-medium transition-all cursor-pointer ${
-                              isSelected
-                                ? "border-neutral-900 bg-neutral-900 text-white shadow-xs"
-                                : "border-neutral-200 bg-white text-neutral-800 hover:border-neutral-300 hover:bg-neutral-50"
-                            }`}
-                          >
-                            {val.value}
-                          </button>
-                        );
-                      })}
-                    </div>
+                ) : (
+                  <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-ink-soft">
+                    <img src="/logo.svg" alt="" className="h-16 w-16 opacity-25" />
+                    <span>Photo coming soon</span>
                   </div>
+                )}
+              </div>
+            </div>
+
+            {images.length > 1 && (
+              <div className="mt-4 flex gap-3 overflow-x-auto pb-1 lg:order-first lg:mt-0 lg:flex-col lg:overflow-visible lg:pb-0">
+                {images.map((img, idx) => (
+                  <button
+                    key={img.id ?? idx}
+                    type="button"
+                    onClick={() => setActiveImage(idx)}
+                    aria-label={`Show image ${idx + 1} of ${images.length}`}
+                    aria-current={activeImage === idx}
+                    className={cn(
+                      "h-16 w-14 shrink-0 cursor-pointer overflow-hidden rounded-xl border-2 bg-mist transition-colors lg:h-24 lg:w-20",
+                      activeImage === idx ? "border-ink" : "border-line hover:border-ink",
+                    )}
+                  >
+                    <img src={img.url} alt="" className="h-full w-full object-cover" />
+                  </button>
                 ))}
               </div>
             )}
-
-            {/* Description */}
-            {product.description && (
-              <div className="prose prose-sm text-neutral-600 leading-relaxed">
-                <p>{product.description}</p>
-              </div>
-            )}
           </div>
 
-          {/* Add to Cart CTA */}
-          <div className="space-y-4 pt-6 border-t border-neutral-200">
-            <Button
-              size="xl"
-              onClick={handleAddToCart}
-              isLoading={isCartLoading}
-              isDisabled={!matchedVariant}
-              className="w-full text-base font-semibold"
-            >
-              <ShoppingBag className="h-5 w-5 mr-2" />
-              Add to Cart
-            </Button>
+          {/* Details */}
+          <div className="lg:col-span-5">
+            <div className="lg:sticky lg:top-24 lg:pt-24">
+              <h1 className="font-display-tight text-[clamp(3rem,7vw,5.75rem)] text-ink">
+                {product.title}
+              </h1>
+              {product.subtitle && <p className="mt-3 text-lg text-ink-soft">{product.subtitle}</p>}
 
-            {/* Trust Badges */}
-            <div className="grid grid-cols-3 gap-2 pt-4 text-center text-xs text-neutral-500">
-              <div className="flex flex-col items-center gap-1">
-                <Truck className="h-4 w-4 text-neutral-400" />
-                <span>Fast Worldwide Delivery</span>
+              <div className="mt-5 flex items-baseline gap-3">
+                {price != null ? (
+                  <>
+                    <span className="tabular text-3xl font-semibold text-ink">
+                      {isFromPrice && (
+                        <span className="mr-1.5 text-lg font-medium text-ink-soft">From</span>
+                      )}
+                      {formatPrice(price, currencyCode)}
+                    </span>
+                    {hasDiscount && (
+                      <>
+                        <span className="tabular text-lg text-ink-soft line-through">
+                          {formatPrice(original, currencyCode)}
+                        </span>
+                        <span className="text-sm font-semibold text-ink">
+                          Save {formatPrice(original - price, currencyCode)}
+                        </span>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <span className="text-ink-soft">Price on request</span>
+                )}
               </div>
-              <div className="flex flex-col items-center gap-1">
-                <RefreshCw className="h-4 w-4 text-neutral-400" />
-                <span>30-Day Easy Returns</span>
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <ShieldCheck className="h-4 w-4 text-neutral-400" />
-                <span>Secure Payments</span>
-              </div>
+
+              {(product.options?.length ?? 0) > 0 && (
+                <div className="mt-8 space-y-6 border-t border-line pt-6">
+                  {product.options?.map((option) => (
+                    <fieldset key={option.id}>
+                      <legend className="text-sm font-semibold text-ink">
+                        {option.title}
+                        {selection[option.id] && (
+                          <span className="ml-2 font-normal text-ink-soft">
+                            {selection[option.id]}
+                          </span>
+                        )}
+                      </legend>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {option.values?.map((val) => {
+                          const value = val.value ?? "";
+                          const available = isValueAvailable(product, selection, option.id, value);
+                          return (
+                            <OptionChip
+                              key={val.id}
+                              name={`opt-${option.id}`}
+                              value={value}
+                              checked={selection[option.id] === value}
+                              unavailable={!available}
+                              onSelect={() => {
+                                setSelection((prev) =>
+                                  selectValue(product, prev, option.id, value),
+                                );
+                                setStatus("idle");
+                              }}
+                            >
+                              {value}
+                            </OptionChip>
+                          );
+                        })}
+                      </div>
+                    </fieldset>
+                  ))}
+                </div>
+              )}
+
+              <Button
+                size="xl"
+                className="mt-8 w-full"
+                onPress={handleAdd}
+                isLoading={status === "adding"}
+                isDisabled={!!variant && !inStock}
+              >
+                {status === "added" ? (
+                  <>
+                    <Check className="h-5 w-5" /> In your bag
+                  </>
+                ) : variant && !inStock ? (
+                  "Sold out"
+                ) : (
+                  "Add to cart"
+                )}
+              </Button>
+              <p aria-live="polite" className="mt-2 text-sm text-puppin-deep empty:mt-0">
+                {status === "needs-option" &&
+                  `Pick a ${missing.map((o) => o.title?.toLowerCase()).join(" and ")} first.`}
+                {status === "error" && "That didn't go through. Try again in a moment."}
+              </p>
+
+              {product.description && (
+                <div className="mt-8 border-t border-line pt-6">
+                  <h2 className="text-sm font-semibold text-ink">About this piece</h2>
+                  <p className="mt-2 max-w-[65ch] text-base leading-relaxed text-ink-soft">
+                    {product.description}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      {related.length > 0 && (
+        <section className="mx-auto mt-28 max-w-[88rem] px-4 sm:px-6 lg:px-10">
+          <h2 className="font-display-tight border-b-2 border-ink pb-4 text-[clamp(3rem,8vw,7rem)]">
+            More from <span className="text-puppin">Puppin</span>
+          </h2>
+          <div className="mt-10 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
+            {related.map((p) => (
+              <ProductCard
+                key={p.id}
+                product={p}
+                countryCode={countryCode}
+                currencyCode={currencyCode}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
+function ProductNotFound() {
+  const { countryCode } = Route.useParams();
+  return (
+    <div className="mx-auto flex max-w-xl flex-col items-center px-4 py-24 text-center">
+      <img src="/images/puppin/nap.webp" alt="" className="w-72" />
+      <h1 className="font-display-tight mt-6 text-6xl">
+        Not <span className="text-puppin">here</span>
+      </h1>
+      <p className="mt-3 text-lg text-ink-soft">
+        Puppin looked everywhere, then fell asleep. This piece may have sold out or moved.
+      </p>
+      <Link
+        to="/$countryCode"
+        params={{ countryCode }}
+        className="mt-8 inline-flex min-h-[50px] items-center rounded-full bg-puppin px-6 font-semibold text-white transition-colors hover:bg-puppin-deep"
+      >
+        Back to the shop
+      </Link>
     </div>
   );
 }

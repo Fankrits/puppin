@@ -37,7 +37,8 @@ export async function getProductByHandle(
     const params: HttpTypes.StoreProductListParams = {
       handle,
       limit: 1,
-      fields: "*variants,*variants.calculated_price,*options,*options.values,*images,*categories",
+      fields:
+        "*variants,*variants.calculated_price,*variants.options,+variants.inventory_quantity,*options,*options.values,*images,*categories",
       ...(regionId ? { region_id: regionId } : {}),
     };
 
