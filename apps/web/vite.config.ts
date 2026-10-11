@@ -11,8 +11,11 @@ const config = defineConfig({
   staged: {
     "*": "vp check --fix",
   },
-  fmt: {},
+  fmt: {
+    ignorePatterns: ["src/routeTree.gen.ts"],
+  },
   lint: {
+    ignorePatterns: ["src/routeTree.gen.ts"],
     jsPlugins: [{ name: "vite-plus", specifier: "vite-plus/oxlint-plugin" }],
     rules: { "vite-plus/prefer-vite-plus-imports": "error" },
     options: { typeAware: true, typeCheck: true },

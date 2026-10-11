@@ -10,11 +10,17 @@ To install dependencies:
 bun install
 ```
 
-To run the application:
+To run both web and backend concurrently in parallel:
 
 ```bash
-bun run dev:web      # Start web app (TanStack Start)
-bun run dev:medusa   # Start Medusa backend
+bun run dev
+```
+
+Or run individual apps:
+
+```bash
+bun run dev:web      # Start web app (TanStack Start, port 3000)
+bun run dev:medusa   # Start Medusa backend (port 9000)
 ```
 
 # Building For Production
