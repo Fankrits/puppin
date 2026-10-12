@@ -41,6 +41,20 @@ typography:
     fontSize: "0.875rem"
     fontWeight: 600
     lineHeight: 1.4
+  nav-link:
+    fontFamily: "Anuphan Variable, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "15px"
+    fontWeight: 500
+  wordmark-small:
+    fontFamily: "Anybody Variable, Kanit, sans-serif"
+    fontSize: "1.75rem"
+    fontWeight: 900
+    lineHeight: 1
+    fontVariation: "'wdth' 62"
+  badge:
+    fontFamily: "Anuphan Variable, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "11px"
+    fontWeight: 700
 rounded:
   pill: "9999px"
   card: "16px"
@@ -141,6 +155,9 @@ One saturated red does all the work on a quiet white field; the mint exists only
 - **Title** (600, 1.25rem): product names in the hero quick-add card; 1rem in product tiles.
 - **Body** (400, 1.125rem, 1.65): intro and story copy, capped at about 34rem.
 - **Label** (600, 0.875rem): chips, small headings, footer column heads.
+- **Nav link** (500, 15px): navbar links and menu-bar buttons.
+- **Small wordmark** (900, 1.75rem, condensed caps): PUPPIN beside the logo mark in the navbar and the mobile sheet.
+- **Badge** (700, 11px, tabular): the cart count.
 
 ### Named Rules
 
@@ -207,9 +224,13 @@ Controls are full pills. Product tiles use 16px corners and the hero panel 28px.
 
 ### Navigation
 
-- White, sticky, 64px high, with a Line bottom border.
-- Logo mark plus the PUPPIN wordmark in display type; the mark tilts -6° on hover.
-- Links are 15px Ink Soft and turn Ink on hover. The cart shows a red tabular badge.
+- White and sticky. It is 72px tall at the top of the page and 56px once the page scrolls past 24px. The bottom Line border appears only once scrolled.
+- The Puppin logo mark sits beside the PUPPIN wordmark. On scroll the wordmark tucks away and only the face mark stays. The mark tilts -6° on hover and hops when an item is added to the cart, but not on page load.
+- Links are 15px Ink Soft and turn Ink on hover. A red underline grows from the left on hover and stays on the active page.
+- The right side holds the country and currency label ("DK · EUR"), the account link (icon only below lg) and the cart. The cart shows a red tabular badge only when it has items.
+- The country picker is react-aria's `Select`, the same library as `Button` and `Drawer`. The trigger is a pill reading "DK · EUR". It opens a Paper popover (16px corners, Line border, Menu shadow) listing each country with its currency; the focused row turns Mist and the selected one gets a Puppin-red check. Keyboard, typeahead and screen-reader support come from the library.
+- Style react-aria state with `data-[pressed]:`, `data-[selected]:`, `data-[focused]:` and `data-[entering]:` variants. The bare `pressed:` and `selected:` shorthands need a Tailwind plugin this project does not install.
+- **Mobile menu:** a full-screen sheet built on the react-aria modal, with focus trapped and Escape to close. Categories are set in display caps (clamp(3.5rem, 17vw, 6rem)), and the active one is red. A pinned bottom row holds the account link, the country picker and the peek render. The sheet drops in over 360ms (expo-out); the animation is off under reduced motion.
 
 ### Footer
 
